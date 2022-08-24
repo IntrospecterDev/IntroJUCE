@@ -300,9 +300,6 @@ public:
         @see ListBox::scrollToEnsureRowIsOnscreen
     */
     void scrollToEnsureColumnIsOnscreen (int columnId);
-    
-    int OURmouseColumn = 0;
-    int OURmouseRow = -1;
 
     //==============================================================================
     /** @internal */
