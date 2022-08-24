@@ -23,6 +23,9 @@
   ==============================================================================
 */
 
+#include "kNotification.h"
+
+
 namespace juce
 {
 
@@ -176,20 +179,24 @@ public:
 
         if (isEnabled())
         {
-            if (! isSelected)
-            {
-                owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
+            auto columnId = owner.getHeader().getColumnIdAtX (e.x);
+            owner.OURmouseColumn = columnId; //store column id
+            owner.OURmouseRow = row;
+//            if (! isSelected)
+//            {
+            //NB every that changes the selection has to go through here
+                owner.OURselectRowsBasedOnModifierKeys (row, e.mods, false);
 
-                auto columnId = owner.getHeader().getColumnIdAtX (e.x);
-
+              
                 if (columnId != 0)
                     if (auto* m = owner.getModel())
+                        //NB anything that needs to know about columns has to go here
                         m->cellClicked (row, columnId, e);
-            }
-            else
-            {
-                selectRowOnMouseUp = true;
-            }
+//            }
+//            else
+//            {
+//                selectRowOnMouseUp = true;
+//            }
         }
     }
 
@@ -200,38 +207,49 @@ public:
              && e.mouseWasDraggedSinceMouseDown()
              && ! isDragging)
         {
-            SparseSet<int> rowsToDrag;
-
-            if (owner.selectOnMouseDown || owner.isRowSelected (row))
-                rowsToDrag = owner.getSelectedRows();
-            else
-                rowsToDrag.addRange (Range<int>::withStartAndLength (row, 1));
-
-            if (rowsToDrag.size() > 0)
-            {
-                auto dragDescription = owner.getModel()->getDragSourceDescription (rowsToDrag);
-
-                if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
-                {
-                    isDragging = true;
-                    owner.startDragAndDrop (e, rowsToDrag, dragDescription, true);
-                }
-            }
+            auto pos = e.getEventRelativeTo (&owner).position.toInt();
+            auto r = owner.getRowContainingPosition(pos.x, pos.y);
+//            std::cout<<"row:"<<r<<"\n";
+//            if (! isSelected)         //engine thinks we ARE selected - this is fighting the engine
+//            {
+                owner.OURselectRowsBasedOnModifierKeys (r, e.mods, false);
+//            }
+            
+            //this is all for row dragging - dont need thhat
+            
+//            SparseSet<int> rowsToDrag;
+//
+//            if (owner.selectOnMouseDown || owner.isRowSelected (row))
+//                rowsToDrag = owner.getSelectedRows();
+//            else
+//                rowsToDrag.addRange (Range<int>::withStartAndLength (row, 1));
+//
+//            if (rowsToDrag.size() > 0)
+//            {
+//                auto dragDescription = owner.getModel()->getDragSourceDescription (rowsToDrag);
+//
+//                if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
+//                {
+//                    isDragging = true;
+//                    owner.startDragAndDrop (e, rowsToDrag, dragDescription, true);
+//                }
+//            }
+           // owner.getViewport()->autoScroll(e.x, e.y,10,8);
         }
     }
 
     void mouseUp (const MouseEvent& e) override
     {
-        if (selectRowOnMouseUp && e.mouseWasClicked() && isEnabled())
-        {
-            owner.selectRowsBasedOnModifierKeys (row, e.mods, true);
-
-            auto columnId = owner.getHeader().getColumnIdAtX (e.x);
-
-            if (columnId != 0)
-                if (TableListBoxModel* m = owner.getModel())
-                    m->cellClicked (row, columnId, e);
-        }
+//        if (selectRowOnMouseUp && e.mouseWasClicked() && isEnabled())
+//        {
+//            owner.selectRowsBasedOnModifierKeys (row, e.mods, true);
+//
+//            auto columnId = owner.getHeader().getColumnIdAtX (e.x);
+//
+//            if (columnId != 0)
+//                if (TableListBoxModel* m = owner.getModel())
+//                    m->cellClicked (row, columnId, e);
+//        }
     }
 
     void mouseDoubleClick (const MouseEvent& e) override
@@ -415,7 +433,112 @@ TableListBox::TableListBox (const String& name, TableListBoxModel* const m)
 TableListBox::~TableListBox()
 {
 }
+void TableListBox::OURselectRowsBasedOnModifierKeys (const int row,
+                                                         ModifierKeys mods,
+                                                         const bool isMouseUpEvent)
+{
+    //compositionview table row selection handler
+    
+//    if(useKrakenSelection == false){
+//        ListBox::selectRowsBasedOnModifierKeys(row, mods, isMouseUpEvent);
+//        return;
+//    }
+    
+    static int rangeStartRow = -1;
+    
+    //selectRowInternal (const int row, bool dontScroll,bool deselectOthersFirst,bool isMouseClick)
+    
+    if(mods.isCtrlDown()){
+        if(mods.isCommandDown()){
+            //add row to selection if ctrl and command are down
+            selectRowInternal (row, false, false, true);
+        
+            if(mods.isAltDown()){
+                if(rangeStartRow==-1){
+                    //begin a range selection
+                    rangeStartRow = row;
+                }else{
+                    //do range selection
+                    auto rowDiff = row-rangeStartRow;
+                    int startRow, endRow;
+                    if(rowDiff>0){
+                        //positive range
+                        startRow = rangeStartRow;
+                        endRow = row;
+                    }else{
+                        //negative range
+                        startRow = row;
+                        endRow = rangeStartRow;
+                    }
+                    //select all rows in range
+                    for(int r = startRow;r<endRow;r++){
+                        selectRowInternal (r, false, false, true);
+                    }
+                    
+                    rangeStartRow=-1;   //reset range
+                    
+                }
+                
+                
+            }else{
+                //reset range start for normal selection clicks
+                rangeStartRow=-1;
+            }
+        }else{  //Command not down
+            //deselect
+            deselectRow(row);
+            
+        }
+    }else if(mods.isShiftDown()){
+        /* Do this is CellClicked instead where the column is more easily available */
+        /* Maybe move all this behaviour into the model?? */
 
+//        if (row!=-1) {
+//            if(mods.isAltDown()){
+//                kNotification::PostNotification("shiftOptClickRow");
+//            }else{
+//                kNotification::PostNotification("shiftClickRow");
+//            }
+//        }
+    }else{
+        bool _isSlaving = false;
+        bool _doubleclick = false;
+        if ((!_isSlaving)) {
+            
+            if (_doubleclick) {
+                notificationData data(row);
+                //data.I32_2 = (int)mousecolumn;
+                kNotification::PostNotificationWithData("DoubleClick", &data);
+                
+            }else{
+                notificationData data(row);
+//                data.I32_2 = oldrow;
+                kNotification::PostNotificationWithData("activeEventSelectionDidChange", &data);
+            }
+        }
+    }
+
+//    dragging = YES;
+    
+    
+
+    
+    //STANDARD IMPLEMENTATION BELOW
+    /*
+    if (multipleSelection && (mods.isCommandDown() || alwaysFlipSelection))
+    {
+        flipRowSelection (row);
+    }
+    else if (multipleSelection && mods.isShiftDown() && lastRowSelected >= 0)
+    {
+        selectRangeOfRows (lastRowSelected, row);
+    }
+    else if ((! mods.isPopupMenu()) || ! isRowSelected (row))
+    {
+        selectRowInternal (row, false, ! (multipleSelection && (! isMouseUpEvent) && isRowSelected (row)), true);
+    }
+     */
+}
 void TableListBox::setModel (TableListBoxModel* newModel)
 {
     if (model != newModel)
