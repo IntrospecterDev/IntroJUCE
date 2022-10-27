@@ -351,7 +351,7 @@ struct UIViewPeerControllerReceiver
 
 //==============================================================================
 class UIViewComponentPeer  : public ComponentPeer,
-                             private UIViewPeerControllerReceiver
+                             public UIViewPeerControllerReceiver
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
@@ -1754,8 +1754,10 @@ void UIViewComponentPeer::onScroll (UIPanGestureRecognizer* gesture)
     details.isSmooth = true;
     details.isInertial = false;
 
+    const auto reconstructedMousePosition = convertToPointFloat ([gesture locationInView: view]) - convertToPointFloat (offset);
+
     handleMouseWheel (MouseInputSource::InputSourceType::touch,
-                      convertToPointFloat ([gesture locationInView: view]),
+                      reconstructedMousePosition,
                       UIViewComponentPeer::getMouseTime ([[NSProcessInfo processInfo] systemUptime]),
                       details);
 }
