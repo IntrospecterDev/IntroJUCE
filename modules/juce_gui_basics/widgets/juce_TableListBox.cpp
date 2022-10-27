@@ -182,7 +182,7 @@ public:
 
                 auto columnId = owner.getHeader().getColumnIdAtX (e.x);
 
-                if (columnId != 0)
+//                if (columnId != 0)        //MARC: REMOVED THIS TO ALLOW CELL CLICKED ON EMPTY SPACE IN THE DETAIL VIEW - MUST HANDLE IN ENGINE
                     if (auto* m = owner.getModel())
                         m->cellClicked (row, columnId, e);
             }
