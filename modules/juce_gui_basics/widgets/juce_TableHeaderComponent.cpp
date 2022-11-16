@@ -545,9 +545,10 @@ void TableHeaderComponent::resized()
             }
 
             x += ci->width;
-
-            if (x >= clip.getRight())
-                break;
+            
+            if (x >= clip.getRight()){
+                // break;
+            }
         }
     }
 }

@@ -1117,7 +1117,7 @@ public:
         /* You must call detach() or delete your OpenGLContext to remove it
            from a component BEFORE deleting the component that it is using!
         */
-        jassertfalse;
+         jassertfalse;
 
         ComponentMovementWatcher::componentBeingDeleted (c);
     }
