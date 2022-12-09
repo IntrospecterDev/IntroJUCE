@@ -508,7 +508,7 @@ void TableHeaderComponent::paint (Graphics& g)
 
     for (auto* ci : columns)
     {
-        std::cout<<ci->getTitle()<<(ci->isVisible()?"Y":"N")<<" wid:"<<ci->getWidth()<<"paint \n";  //MARC EDIT
+        //std::cout<<ci->getTitle()<<(ci->isVisible()?"Y":"N")<<" wid:"<<ci->getWidth()<<"paint \n";  //MARC EDIT
         if (ci->isVisible() && ci->getWidth() > 0)
         {
             Graphics::ScopedSaveState ss (g);
@@ -535,7 +535,7 @@ void TableHeaderComponent::resized()
 
     for (auto* ci : columns)
     {
-        std::cout<<ci->getTitle()<<" "<<(ci->isVisible()?"Y":"N")<<" w:"<<ci->width<<"---\n"; //MARC
+        //std::cout<<ci->getTitle()<<" "<<(ci->isVisible()?"Y":"N")<<" w:"<<ci->width<<"---\n"; //MARC
         if (ci->isVisible())
         {
             if (x + ci->width > clip.getX()
