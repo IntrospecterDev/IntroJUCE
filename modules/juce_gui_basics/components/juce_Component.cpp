@@ -1804,6 +1804,7 @@ void Component::exitModalState (int returnValue)
             mcm.endModal (this, returnValue);
             mcm.bringModalComponentsToFront();
 
+            
             // While this component is in modal state it may block other components from receiving
             // mouseEnter events. To keep mouseEnter and mouseExit calls balanced on these components,
             // we must manually force the mouse to "enter" blocked components.
