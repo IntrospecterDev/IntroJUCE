@@ -428,7 +428,7 @@ public:
         ColumnInfo() { setInterceptsMouseClicks (false, false); }
         std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
         
-        int id, propertyFlags, width, minimumWidth, maximumWidth, storedMaximumWidth;
+        int id, propertyFlags, width, minimumWidth, maximumWidth, originalMaximumWidth, originalMinimumWidth;
         double lastDeliberateWidth;
     };
     OwnedArray<ColumnInfo> columns;

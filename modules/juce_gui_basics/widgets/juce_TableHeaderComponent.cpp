@@ -123,7 +123,8 @@ void TableHeaderComponent::addColumn (const String& columnName,
     ci->lastDeliberateWidth = width;
     ci->minimumWidth = minimumWidth;
     ci->maximumWidth = maximumWidth >= 0 ? maximumWidth : std::numeric_limits<int>::max();
-    ci->storedMaximumWidth = maximumWidth;   // giulio
+    ci->originalMaximumWidth = maximumWidth;   // giulio
+    ci->originalMinimumWidth = minimumWidth;   // giulio
     jassert (ci->maximumWidth >= ci->minimumWidth);
     ci->propertyFlags = propertyFlags;
 
