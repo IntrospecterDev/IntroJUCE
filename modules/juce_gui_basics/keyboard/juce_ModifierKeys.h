@@ -67,6 +67,16 @@ public:
     */
     inline bool isCommandDown() const noexcept          { return testFlags (commandModifier); }
 
+    /* we rearranged the crossplatform handling of key modifiers, clamping them to only 2 modifiers*/
+#if JUCE_MAC || JUCE_IOS
+    inline bool isMod1Down() const noexcept { return isCommandDown(); }
+    inline bool isMod2Down() const noexcept { return isCtrlDown(); }
+#else
+    inline bool isMod1Down() const noexcept { return isCtrlDown(); }
+    inline bool isMod2Down() const noexcept { return isAltDown(); }
+
+#endif
+
     /** Checks whether the user is trying to launch a pop-up menu.
 
         This checks for platform-specific modifiers that might indicate that the user
