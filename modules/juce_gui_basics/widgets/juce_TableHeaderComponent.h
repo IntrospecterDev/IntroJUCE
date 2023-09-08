@@ -424,17 +424,22 @@ public:
     /** Can be overridden for more control over the pop-up menu behaviour. */
     virtual void showColumnChooserMenu (int columnIdClicked);
 
-private:
+    // =================================================== this used to be in private
     struct ColumnInfo : public Component
     {
         ColumnInfo() { setInterceptsMouseClicks (false, false); }
         std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
-
-        int id, propertyFlags, width, minimumWidth, maximumWidth;
+        
+        int id, propertyFlags, width, minimumWidth, maximumWidth, originalMaximumWidth, originalMinimumWidth;
         double lastDeliberateWidth;
     };
-
     OwnedArray<ColumnInfo> columns;
+    // ===================================================
+    
+    // =================================================== this is added by Giulio
+    ColumnInfo* getColumnInfoAt(int index){ return columns[index]; }
+    
+private:
     Array<Listener*> listeners;
     std::unique_ptr<Component> dragOverlayComp;
     class DragOverlayComp;

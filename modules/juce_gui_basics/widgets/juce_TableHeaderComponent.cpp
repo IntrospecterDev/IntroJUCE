@@ -123,6 +123,8 @@ void TableHeaderComponent::addColumn (const String& columnName,
     ci->lastDeliberateWidth = width;
     ci->minimumWidth = minimumWidth;
     ci->maximumWidth = maximumWidth >= 0 ? maximumWidth : std::numeric_limits<int>::max();
+    ci->originalMaximumWidth = maximumWidth;   // giulio
+    ci->originalMinimumWidth = minimumWidth;   // giulio
     jassert (ci->maximumWidth >= ci->minimumWidth);
     ci->propertyFlags = propertyFlags;
 
@@ -535,6 +537,7 @@ void TableHeaderComponent::paint (Graphics& g)
 
     for (auto* ci : columns)
         drawColumnHeader (g, lf, *ci);
+
 }
 
 void TableHeaderComponent::resized()
@@ -543,9 +546,10 @@ void TableHeaderComponent::resized()
 
     for (auto* ci : columns)
     {
-        const auto widthToUse = ci->isVisible() ? ci->width : 0;
+        const auto widthToUse = ci->isVisible() ? ci->width : 0; 
         ci->setBounds (x, 0, widthToUse, getHeight());
         x += widthToUse;
+
     }
 }
 

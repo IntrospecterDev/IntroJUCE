@@ -1096,7 +1096,7 @@ public:
              && context.nativeContext != nullptr)
         {
             if (auto* c = CachedImage::get (comp))
-                c->handleResize();
+              //  c->handleResize();    //MARC EDIT - removing this seems to improve the sliding and glitching waveform... why????
 
             if (auto* peer = comp.getTopLevelComponent()->getPeer())
                 context.nativeContext->updateWindowPosition (peer->getAreaCoveredBy (comp));
@@ -1136,7 +1136,7 @@ public:
         /* You must call detach() or delete your OpenGLContext to remove it
            from a component BEFORE deleting the component that it is using!
         */
-        jassertfalse;
+         jassertfalse;
 
         ComponentMovementWatcher::componentBeingDeleted (c);
     }

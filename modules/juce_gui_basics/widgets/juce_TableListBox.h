@@ -224,7 +224,9 @@ public:
 
     /** Destructor. */
     ~TableListBox() override;
-
+    void OURselectRowsBasedOnModifierKeys (const int row,
+                                           ModifierKeys mods,
+                                           const bool isMouseUpEvent);
     //==============================================================================
     /** Changes the TableListBoxModel that is being used for this table.
         The TableListBox does not take ownership of the model - it's the caller's responsibility

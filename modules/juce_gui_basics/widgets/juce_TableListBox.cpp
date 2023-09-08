@@ -173,6 +173,7 @@ public:
         if (columnId != 0)
             if (auto* m = owner.getTableListBoxModel())
                 m->cellClicked (getRow(), columnId, e);
+
     }
 
     void mouseDoubleClick (const MouseEvent& e) override
