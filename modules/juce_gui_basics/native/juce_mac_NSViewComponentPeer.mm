@@ -525,7 +525,7 @@ public:
         if (! isSharedWindow)
         {
             [window setLevel: alwaysOnTop ? ((getStyleFlags() & windowIsTemporary) != 0 ? NSPopUpMenuWindowLevel
-                                                                                        : NSModalPanelWindowLevel)//marc edit
+                                                                                        : NSFloatingWindowLevel)//marc edit (was floating)
                                           : NSNormalWindowLevel];
 
             isAlwaysOnTop = alwaysOnTop;
