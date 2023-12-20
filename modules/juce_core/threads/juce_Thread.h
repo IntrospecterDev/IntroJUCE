@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -109,6 +105,25 @@ public:
         {
             jassert (newMaximumProcessingTimeMs > 0.0);
             return withMember (*this, &RealtimeOptions::maximumProcessingTimeMs, newMaximumProcessingTimeMs);
+        }
+
+        /** Specify the maximum amount of processing time required each time the thread wakes up.
+
+            This is identical to 'withMaximumProcessingTimeMs' except it calculates the processing time
+            from a sample rate and block size. This is useful if you want to run this thread in parallel
+            to an audio device thread.
+
+            Only used by macOS/iOS.
+
+            @see withMaximumProcessingTimeMs, AudioWorkgroup, ScopedWorkgroupToken
+        */
+        [[nodiscard]] RealtimeOptions withApproximateAudioProcessingTime (int samplesPerFrame, double sampleRate) const
+        {
+            jassert (samplesPerFrame > 0);
+            jassert (sampleRate > 0.0);
+
+            const auto approxFrameTimeMs = (samplesPerFrame / sampleRate) * 1000.0;
+            return withMaximumProcessingTimeMs (approxFrameTimeMs);
         }
 
         /** Specify the approximate amount of time between each thread wake up.

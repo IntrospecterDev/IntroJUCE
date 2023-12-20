@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -29,7 +22,7 @@ namespace juce
 namespace DragAndDropHelpers
 {
     //==============================================================================
-    struct JuceDropSource   : public ComBaseClassHelper<IDropSource>
+    struct JuceDropSource final : public ComBaseClassHelper<IDropSource>
     {
         JuceDropSource() {}
 
@@ -51,7 +44,7 @@ namespace DragAndDropHelpers
     };
 
     //==============================================================================
-    struct JuceEnumFormatEtc   : public ComBaseClassHelper<IEnumFORMATETC>
+    struct JuceEnumFormatEtc final : public ComBaseClassHelper<IEnumFORMATETC>
     {
         JuceEnumFormatEtc (const FORMATETC* f)  : format (f) {}
 
@@ -123,7 +116,7 @@ namespace DragAndDropHelpers
     };
 
     //==============================================================================
-    class JuceDataObject  : public ComBaseClassHelper <IDataObject>
+    class JuceDataObject final : public ComBaseClassHelper <IDataObject>
     {
     public:
         JuceDataObject (const FORMATETC* f, const STGMEDIUM* m)
@@ -251,7 +244,7 @@ namespace DragAndDropHelpers
         return static_cast<HDROP> (hDrop.release());
     }
 
-    struct DragAndDropJob   : public ThreadPoolJob
+    struct DragAndDropJob final : public ThreadPoolJob
     {
         DragAndDropJob (FORMATETC f, STGMEDIUM m, DWORD d, std::function<void()>&& cb)
             : ThreadPoolJob ("DragAndDrop"),
@@ -288,7 +281,7 @@ namespace DragAndDropHelpers
         std::function<void()> completionCallback;
     };
 
-    class ThreadPoolHolder   : private DeletedAtShutdown
+    class ThreadPoolHolder final : private DeletedAtShutdown
     {
     public:
         ThreadPoolHolder() = default;

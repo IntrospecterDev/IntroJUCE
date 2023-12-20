@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -124,7 +117,7 @@ void LatestVersionCheckerAndUpdater::run()
 }
 
 //==============================================================================
-class UpdateDialog  : public Component
+class UpdateDialog final : public Component
 {
 public:
     UpdateDialog (const String& newVersion, const String& releaseNotes)
@@ -164,7 +157,7 @@ public:
 
         juceIcon = Drawable::createFromImageData (BinaryData::juce_icon_png,
                                                   BinaryData::juce_icon_pngSize);
-        lookAndFeelChanged();
+        updateLookAndFeel();
 
         setSize (500, 280);
     }
@@ -218,10 +211,15 @@ public:
     }
 
 private:
-    void lookAndFeelChanged() override
+    void updateLookAndFeel()
     {
         cancelButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
         releaseNotesEditor.applyFontToAllText (releaseNotesEditor.getFont());
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateLookAndFeel();
     }
 
     void setParentWindow (DialogWindow* parent)
@@ -380,7 +378,7 @@ void LatestVersionCheckerAndUpdater::addNotificationToOpenProjects (const Versio
 }
 
 //==============================================================================
-class DownloadAndInstallThread   : private ThreadWithProgressWindow
+class DownloadAndInstallThread final : private ThreadWithProgressWindow
 {
 public:
     DownloadAndInstallThread  (const VersionInfo::Asset& a, const File& t, std::function<void (Result)>&& cb)

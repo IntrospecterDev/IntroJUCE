@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -28,7 +21,7 @@
 #include "../../Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h"
 
 //==============================================================================
-struct ContentViewHeader    : public Component
+struct ContentViewHeader final : public Component
 {
     ContentViewHeader (String headerName, Icon headerIcon)
         : name (headerName), icon (headerIcon)
@@ -54,7 +47,7 @@ struct ContentViewHeader    : public Component
 };
 
 //==============================================================================
-class ListBoxHeader    : public Component
+class ListBoxHeader final : public Component
 {
 public:
     ListBoxHeader (Array<String> columnHeaders)
@@ -72,11 +65,10 @@ public:
     {
         jassert (columnHeaders.size() == columnWidths.size());
 
-        auto index = 0;
-        for (auto s : columnHeaders)
+        for (const auto [index, s] : enumerate (columnHeaders))
         {
             addAndMakeVisible (headers.add (new Label (s, s)));
-            widths.add (columnWidths.getUnchecked (index++));
+            widths.add (columnWidths.getUnchecked ((int) index));
         }
 
         recalculateWidths();
@@ -154,7 +146,7 @@ private:
 };
 
 //==============================================================================
-class InfoButton  : public Button
+class InfoButton final : public Button
 {
 public:
     InfoButton (const String& infoToDisplay = {})
@@ -217,7 +209,7 @@ private:
     int numLines = 1;
 
     //==============================================================================
-    struct InfoWindow    : public Component
+    struct InfoWindow final : public Component
     {
         InfoWindow (const String& s)
             : stringToDisplay (s)
@@ -241,8 +233,8 @@ private:
 };
 
 //==============================================================================
-class PropertyGroupComponent  : public Component,
-                                private TextPropertyComponent::Listener
+class PropertyGroupComponent final : public Component,
+                                     private TextPropertyComponent::Listener
 {
 public:
     PropertyGroupComponent (String name, Icon icon, String desc = {})
@@ -344,7 +336,7 @@ public:
 
 private:
     //==============================================================================
-    struct PropertyAndInfoWrapper  : public Component
+    struct PropertyAndInfoWrapper final : public Component
     {
         PropertyAndInfoWrapper (PropertyComponent& c, InfoButton& i)
             : propertyComponent (c),

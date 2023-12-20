@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -323,9 +316,9 @@ void FileBrowserComponent::setFileFilter (const FileFilter* const newFileFilter)
 
 String FileBrowserComponent::getActionVerb() const
 {
-    return isSaveMode() ? ((flags & canSelectDirectories) != 0 ? TRANS("Choose")
-                                                               : TRANS("Save"))
-                        : TRANS("Open");
+    return isSaveMode() ? ((flags & canSelectDirectories) != 0 ? TRANS ("Choose")
+                                                               : TRANS ("Save"))
+                        : TRANS ("Open");
 }
 
 void FileBrowserComponent::setFilenameBoxLabel (const String& name)
@@ -529,7 +522,7 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
 
     for (int i = 0; i < roots.size(); ++i)
     {
-        const File& drive = roots.getReference(i);
+        const File& drive = roots.getReference (i);
 
         String name (drive.getFullPathName());
         rootPaths.add (name);
@@ -539,13 +532,13 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
             String volume (drive.getVolumeLabel());
 
             if (volume.isEmpty())
-                volume = TRANS("Hard Drive");
+                volume = TRANS ("Hard Drive");
 
             name << " [" << volume << ']';
         }
         else if (drive.isOnCDRomDrive())
         {
-            name << " [" << TRANS("CD/DVD drive") << ']';
+            name << " [" << TRANS ("CD/DVD drive") << ']';
         }
 
         rootNames.add (name);
@@ -555,25 +548,25 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootNames.add ({});
 
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add (TRANS("Documents"));
+    rootNames.add (TRANS ("Documents"));
     rootPaths.add (File::getSpecialLocation (File::userMusicDirectory).getFullPathName());
-    rootNames.add (TRANS("Music"));
+    rootNames.add (TRANS ("Music"));
     rootPaths.add (File::getSpecialLocation (File::userPicturesDirectory).getFullPathName());
-    rootNames.add (TRANS("Pictures"));
+    rootNames.add (TRANS ("Pictures"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (TRANS("Desktop"));
+    rootNames.add (TRANS ("Desktop"));
 
    #elif JUCE_MAC
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add (TRANS("Home folder"));
+    rootNames.add (TRANS ("Home folder"));
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add (TRANS("Documents"));
+    rootNames.add (TRANS ("Documents"));
     rootPaths.add (File::getSpecialLocation (File::userMusicDirectory).getFullPathName());
-    rootNames.add (TRANS("Music"));
+    rootNames.add (TRANS ("Music"));
     rootPaths.add (File::getSpecialLocation (File::userPicturesDirectory).getFullPathName());
-    rootNames.add (TRANS("Pictures"));
+    rootNames.add (TRANS ("Pictures"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (TRANS("Desktop"));
+    rootNames.add (TRANS ("Desktop"));
 
     rootPaths.add ({});
     rootNames.add ({});
@@ -591,9 +584,9 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootPaths.add ("/");
     rootNames.add ("/");
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add (TRANS("Home folder"));
+    rootNames.add (TRANS ("Home folder"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (TRANS("Desktop"));
+    rootNames.add (TRANS ("Desktop"));
    #endif
 }
 

@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -149,7 +145,7 @@ struct MathConstants
     /** A predefined value for Euler's number */
     static constexpr FloatType euler = static_cast<FloatType> (2.71828182845904523536L);
 
-    /** A predefined value for sqrt(2) */
+    /** A predefined value for sqrt (2) */
     static constexpr FloatType sqrt2 = static_cast<FloatType> (1.4142135623730950488L);
 };
 
@@ -208,6 +204,8 @@ constexpr bool exactlyEqual (Type a, Type b)
 /** A class encapsulating both relative and absolute tolerances for use in floating-point comparisons.
 
     @see approximatelyEqual, absoluteTolerance, relativeTolerance
+
+    @tags{Core}
 */
 template <typename Type>
 class Tolerance
@@ -276,8 +274,8 @@ static Tolerance<Type> relativeTolerance (Type tolerance)
     differences that are subnormal are always considered equal. It is highly recommend this
     value is reviewed depending on the calculation being carried out. In general specifying an
     absolute value is useful when considering values close to zero. For example you might
-    expect sin(pi) to return 0, but what it actually returns is close to the error of the value pi.
-    Therefore, in this example it might be better to set the absolute tolerance to sin(pi).
+    expect sin (pi) to return 0, but what it actually returns is close to the error of the value pi.
+    Therefore, in this example it might be better to set the absolute tolerance to sin (pi).
 
     The default relative tolerance is equal to the machine epsilon which is the difference between
     1.0 and the next floating-point value that can be represented by Type. In most cases this value

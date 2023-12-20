@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -151,8 +144,8 @@ private:
 };
 
 //==============================================================================
-class ListBox::RowComponent  : public TooltipClient,
-                               public ComponentWithListRowMouseBehaviours<RowComponent>
+class ListBox::RowComponent final  : public TooltipClient,
+                                     public ComponentWithListRowMouseBehaviours<RowComponent>
 {
 public:
     explicit RowComponent (ListBox& lb) : owner (lb) {}
@@ -227,7 +220,7 @@ public:
 
 private:
     //==============================================================================
-    class RowAccessibilityHandler  : public AccessibilityHandler
+    class RowAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         explicit RowAccessibilityHandler (RowComponent& rowComponentToWrap)
@@ -269,7 +262,7 @@ private:
         }
 
     private:
-        class RowCellInterface  : public AccessibilityCellInterface
+        class RowCellInterface final : public AccessibilityCellInterface
         {
         public:
             explicit RowCellInterface (RowAccessibilityHandler& h)  : handler (h)  {}
@@ -297,15 +290,15 @@ private:
 
 
 //==============================================================================
-class ListBox::ListViewport  : public Viewport,
-                               private Timer
+class ListBox::ListViewport final : public Viewport,
+                                    private Timer
 {
 public:
     ListViewport (ListBox& lb)  : owner (lb)
     {
         setWantsKeyboardFocus (false);
 
-        struct IgnoredComponent : Component
+        struct IgnoredComponent final : public Component
         {
             std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
             {
@@ -512,7 +505,7 @@ private:
 };
 
 //==============================================================================
-struct ListBoxMouseMoveSelector  : public MouseListener
+struct ListBoxMouseMoveSelector final : public MouseListener
 {
     ListBoxMouseMoveSelector (ListBox& lb) : owner (lb)
     {
@@ -1161,7 +1154,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const SparseSet<int>& rowsT
 
 std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
 {
-    class TableInterface  : public AccessibilityTableInterface
+    class TableInterface final : public AccessibilityTableInterface
     {
     public:
         explicit TableInterface (ListBox& listBoxToWrap)

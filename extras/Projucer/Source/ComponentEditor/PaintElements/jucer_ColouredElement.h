@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -39,8 +32,8 @@ class ColouredElement   : public PaintElement
 public:
     ColouredElement (PaintRoutine* owner,
                      const String& name,
-                     const bool showOutline_,
-                     const bool showJointAndEnd_);
+                     bool showOutline_,
+                     bool showJointAndEnd_);
 
     ~ColouredElement() override;
 
@@ -50,18 +43,18 @@ public:
 
     //==============================================================================
     const JucerFillType& getFillType() noexcept;
-    void setFillType (const JucerFillType& newType, const bool undoable);
+    void setFillType (const JucerFillType& newType, bool undoable);
 
     bool isStrokeEnabled() const noexcept;
-    void enableStroke (bool enable, const bool undoable);
+    void enableStroke (bool enable, bool undoable);
 
     const StrokeType& getStrokeType() noexcept;
-    void setStrokeType (const PathStrokeType& newType, const bool undoable);
-    void setStrokeFill (const JucerFillType& newType, const bool undoable);
+    void setStrokeType (const PathStrokeType& newType, bool undoable);
+    void setStrokeFill (const JucerFillType& newType, bool undoable);
 
     //==============================================================================
     Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const override;
-    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable) override;
+    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, bool undoable) override;
 
     void createSiblingComponents() override;
 

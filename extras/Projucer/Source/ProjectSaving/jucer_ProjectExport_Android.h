@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -27,7 +20,7 @@
 
 
 //==============================================================================
-class AndroidProjectExporter  : public ProjectExporter
+class AndroidProjectExporter final : public ProjectExporter
 {
 public:
     //==============================================================================
@@ -105,7 +98,7 @@ public:
                                  androidReadMediaVideoPermission, androidExternalWritePermission,
                                  androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
                                  androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, gradleClangTidy, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -151,6 +144,7 @@ public:
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
           gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.5.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
+          gradleClangTidy                      (settings, Ids::gradleClangTidy,                      getUndoManager(), false),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.3.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
@@ -171,6 +165,9 @@ public:
                                                 { "clang", "gcc" },
                                                 { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
+
+        props.add (new ChoicePropertyComponent (gradleClangTidy, "Use Clang-Tidy"),
+                   "If enabled and the toolchain is clang this will run clang-tidy when compiling.");
     }
 
     //==============================================================================
@@ -272,7 +269,7 @@ public:
 
 protected:
     //==============================================================================
-    class AndroidBuildConfiguration  : public BuildConfiguration
+    class AndroidBuildConfiguration final : public BuildConfiguration
     {
     public:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -533,7 +530,7 @@ private:
 
                 if (! first)
                 {
-                    ProjectExporter::BuildConfiguration::Ptr config (getConfiguration(0));
+                    ProjectExporter::BuildConfiguration::Ptr config (getConfiguration (0));
 
                     if (config)
                     {
@@ -680,10 +677,29 @@ private:
 
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
+        // CMake 3.22 will fail to build Android projects that set ANDROID_ARM_MODE unless NDK 24+ is used
+        mo << "def ndkVersionString = \"25.2.9519653\"" << newLine << newLine;
+
+        if (gradleClangTidy.get() && gradleToolchain.get().toString() == "clang")
+            mo << "def sdkDir = {" << newLine
+               << "    def androidHome = System.getenv('ANDROID_HOME')" << newLine
+               << "    if (androidHome) {" << newLine
+               << "        return androidHome" << newLine
+               << "    }" << newLine
+               << "    Properties properties = new Properties()" << newLine
+               << "    properties.load(project.rootProject.file(\"local.properties\").newDataInputStream())" << newLine
+               << "    return properties.getProperty('sdk.dir')" << newLine
+               << "}()" << newLine
+               << "def llvmDir = \"${sdkDir}/ndk/${ndkVersionString}/toolchains/llvm\"" << newLine
+               << "def clangTidySearch = fileTree(llvmDir).filter { file -> file.name.matches('^clang-tidy(.exe)?$') }" << newLine
+               << "if (clangTidySearch.size() != 1) {" << newLine
+               << "    throw new GradleException(\"Could not locate a unique clang-tidy in ${llvmDir}\")" << newLine
+               << "}" << newLine
+               << "def clangTidy = clangTidySearch.getSingleFile().getAbsolutePath()" << newLine << newLine;
+
         mo << "android {"                                                                    << newLine;
         mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
-        // CMake 3.22 will fail to build Android projects that set ANDROID_ARM_MODE unless NDK 24+ is used
-        mo << "    ndkVersion \"25.2.9519653\""                                              << newLine;
+        mo << "    ndkVersion ndkVersionString"                                              << newLine;
         mo << "    namespace " << project.getBundleIdentifierString().toLowerCase().quoted() << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
         mo << "        cmake {"                                                              << newLine;
@@ -813,7 +829,7 @@ private:
         auto numConfigs = getNumConfigurations();
         for (int i = 0; i < numConfigs; ++i)
         {
-            auto config = getConfiguration(i);
+            auto config = getConfiguration (i);
 
             if (config->isDebug()) numDebugConfigs++;
 
@@ -931,7 +947,7 @@ private:
         return mo.toString();
     }
 
-    void addModuleJavaFolderToSourceSet(StringArray& javaSourceSets, const File& source) const
+    void addModuleJavaFolderToSourceSet (StringArray& javaSourceSets, const File& source) const
     {
         if (source.isDirectory())
         {
@@ -1470,7 +1486,7 @@ private:
                           Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
-            addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild, extraCompilerFlags);
+            addCompileUnits (getAllGroups().getReference (i), mo, excludeFromBuild, extraCompilerFlags);
     }
 
     //==============================================================================
@@ -1487,6 +1503,9 @@ private:
         cmakeArgs.add ("\"-DANDROID_CPP_FEATURES=exceptions rtti\"");
         cmakeArgs.add ("\"-DANDROID_ARM_MODE=arm\"");
         cmakeArgs.add ("\"-DANDROID_ARM_NEON=TRUE\"");
+
+        if (isClang && gradleClangTidy.get())
+            cmakeArgs.add ("\"-DCMAKE_CXX_CLANG_TIDY=${clangTidy}\"");
 
         auto cppStandard = [this]
         {

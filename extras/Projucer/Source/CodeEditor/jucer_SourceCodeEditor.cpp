@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -117,7 +110,7 @@ void SourceCodeDocument::saveAsync (std::function<void (bool)> callback)
 
 void SourceCodeDocument::saveAsAsync (std::function<void (bool)> callback)
 {
-    chooser = std::make_unique<FileChooser> (TRANS("Save As..."), getFile(), "*");
+    chooser = std::make_unique<FileChooser> (TRANS ("Save As..."), getFile(), "*");
     auto flags = FileBrowserComponent::saveMode
                | FileBrowserComponent::canSelectFiles
                | FileBrowserComponent::warnAboutOverwriting;
@@ -375,7 +368,7 @@ void GenericCodeEditorComponent::removeListener (GenericCodeEditorComponent::Lis
 }
 
 //==============================================================================
-class GenericCodeEditorComponent::FindPanel  : public Component
+class GenericCodeEditorComponent::FindPanel final : public Component
 {
 public:
     FindPanel()
@@ -643,7 +636,7 @@ void CppCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEven
     GenericCodeEditorComponent::addPopupMenuItems (menu, e);
 
     menu.addSeparator();
-    menu.addItem (insertComponentID, TRANS("Insert code for a new Component class..."));
+    menu.addItem (insertComponentID, TRANS ("Insert code for a new Component class..."));
 }
 
 void CppCodeEditorComponent::performPopupMenuAction (int menuItemID)

@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -109,7 +102,8 @@ Path::~Path()
 Path::Path (const Path& other)
     : data (other.data),
       bounds (other.bounds),
-      useNonZeroWinding (other.useNonZeroWinding)
+      useNonZeroWinding (other.useNonZeroWinding),
+      modificationCount (other.modificationCount)
 {
 }
 
@@ -120,6 +114,7 @@ Path& Path::operator= (const Path& other)
         data = other.data;
         bounds = other.bounds;
         useNonZeroWinding = other.useNonZeroWinding;
+        modificationCount = other.modificationCount;
     }
 
     return *this;
@@ -128,7 +123,8 @@ Path& Path::operator= (const Path& other)
 Path::Path (Path&& other) noexcept
     : data (std::move (other.data)),
       bounds (other.bounds),
-      useNonZeroWinding (other.useNonZeroWinding)
+      useNonZeroWinding (other.useNonZeroWinding),
+      modificationCount (other.modificationCount)
 {
 }
 
@@ -137,6 +133,7 @@ Path& Path::operator= (Path&& other) noexcept
     data = std::move (other.data);
     bounds = other.bounds;
     useNonZeroWinding = other.useNonZeroWinding;
+    modificationCount = other.modificationCount;
     return *this;
 }
 
@@ -147,6 +144,7 @@ void Path::clear() noexcept
 {
     data.clearQuick();
     bounds.reset();
+    ++modificationCount;
 }
 
 void Path::swapWithPath (Path& other) noexcept
@@ -157,17 +155,20 @@ void Path::swapWithPath (Path& other) noexcept
     std::swap (bounds.pathYMin, other.bounds.pathYMin);
     std::swap (bounds.pathYMax, other.bounds.pathYMax);
     std::swap (useNonZeroWinding, other.useNonZeroWinding);
+    std::swap (modificationCount, other.modificationCount);
 }
 
 //==============================================================================
 void Path::setUsingNonZeroWinding (const bool isNonZero) noexcept
 {
     useNonZeroWinding = isNonZero;
+    ++modificationCount;
 }
 
 void Path::scaleToFit (float x, float y, float w, float h, bool preserveProportions) noexcept
 {
     applyTransform (getTransformToScaleToFit (x, y, w, h, preserveProportions));
+    ++modificationCount;
 }
 
 //==============================================================================
@@ -218,6 +219,7 @@ void Path::startNewSubPath (const float x, const float y)
         bounds.extend (x, y);
 
     data.add (moveMarker, x, y);
+    ++modificationCount;
 }
 
 void Path::startNewSubPath (Point<float> start)
@@ -234,6 +236,7 @@ void Path::lineTo (const float x, const float y)
 
     data.add (lineMarker, x, y);
     bounds.extend (x, y);
+    ++modificationCount;
 }
 
 void Path::lineTo (Point<float> end)
@@ -252,6 +255,7 @@ void Path::quadraticTo (const float x1, const float y1,
 
     data.add (quadMarker, x1, y1, x2, y2);
     bounds.extend (x1, y1, x2, y2);
+    ++modificationCount;
 }
 
 void Path::quadraticTo (Point<float> controlPoint, Point<float> endPoint)
@@ -273,6 +277,7 @@ void Path::cubicTo (const float x1, const float y1,
 
     data.add (cubicMarker, x1, y1, x2, y2, x3, y3);
     bounds.extend (x1, y1, x2, y2, x3, y3);
+    ++modificationCount;
 }
 
 void Path::cubicTo (Point<float> controlPoint1,
@@ -287,7 +292,10 @@ void Path::cubicTo (Point<float> controlPoint1,
 void Path::closeSubPath()
 {
     if (! (data.isEmpty() || isMarker (data.getLast(), closeSubPathMarker)))
+    {
         data.add (closeSubPathMarker);
+        ++modificationCount;
+    }
 }
 
 Point<float> Path::getCurrentPosition() const
@@ -342,6 +350,8 @@ void Path::addRectangle (float x, float y, float w, float h)
               lineMarker, x2, y1,
               lineMarker, x2, y2,
               closeSubPathMarker);
+
+    ++modificationCount;
 }
 
 void Path::addRoundedRectangle (float x, float y, float w, float h, float csx, float csy)
@@ -868,6 +878,8 @@ void Path::applyTransform (const AffineTransform& transform) noexcept
             d += 6;
         }
     }
+
+    ++modificationCount;
 }
 
 
@@ -1223,6 +1235,8 @@ Path Path::createPathWithRoundedCorners (const float cornerRadius) const
 //==============================================================================
 void Path::loadPathFromStream (InputStream& source)
 {
+    ++modificationCount;
+
     while (! source.isExhausted())
     {
         switch (source.readByte())
@@ -1270,11 +1284,11 @@ void Path::loadPathFromStream (InputStream& source)
             break;
 
         case 'n':
-            useNonZeroWinding = true;
+            setUsingNonZeroWinding (true);
             break;
 
         case 'z':
-            useNonZeroWinding = false;
+            setUsingNonZeroWinding (false);
             break;
 
         case 'e':

@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -50,7 +43,7 @@ private:
         if (nCode >= 0 && wParam == WM_MOUSEWHEEL)
         {
             // using a local copy of this struct to support old mingw libraries
-            struct MOUSEHOOKSTRUCTEX_  : public MOUSEHOOKSTRUCT  { DWORD mouseData; };
+            struct MOUSEHOOKSTRUCTEX_ final : public MOUSEHOOKSTRUCT  { DWORD mouseData; };
 
             auto& hs = *(MOUSEHOOKSTRUCTEX_*) lParam;
 
@@ -65,12 +58,11 @@ private:
 
     static LRESULT CALLBACK keyboardHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
     {
-        MSG& msg = *(MSG*) lParam;
+        auto& msg = *reinterpret_cast<MSG*> (lParam);
 
-        if (nCode == HC_ACTION && wParam == PM_REMOVE
-             && HWNDComponentPeer::offerKeyMessageToJUCEWindow (msg))
+        if (nCode == HC_ACTION && wParam == PM_REMOVE && HWNDComponentPeer::offerKeyMessageToJUCEWindow (msg))
         {
-            zerostruct (msg);
+            msg = {};
             msg.message = WM_USER;
             return 0;
         }

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -52,8 +52,8 @@
 #include "../Assets/AudioLiveScrollingDisplay.h"
 
 //==============================================================================
-class LatencyTester  : public AudioIODeviceCallback,
-                       private Timer
+class LatencyTester final : public AudioIODeviceCallback,
+                            private Timer
 {
 public:
     LatencyTester (TextEditor& editorBox)
@@ -304,7 +304,7 @@ private:
 };
 
 //==============================================================================
-class AudioLatencyDemo  : public Component
+class AudioLatencyDemo final : public Component
 {
 public:
     AudioLatencyDemo()

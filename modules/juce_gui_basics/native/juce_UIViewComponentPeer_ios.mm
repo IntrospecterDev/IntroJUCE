@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -22,8 +15,6 @@
 
   ==============================================================================
 */
-
-#include "juce_CGMetalLayerRenderer_mac.h"
 
 #if TARGET_OS_SIMULATOR && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
  #warning JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS uses parts of the Metal API that are currently unsupported in the simulator - falling back to JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS=0
@@ -389,8 +380,8 @@ struct UIViewPeerControllerReceiver
 };
 
 //==============================================================================
-class UIViewComponentPeer  : public ComponentPeer,
-                             public UIViewPeerControllerReceiver
+class UIViewComponentPeer final : public ComponentPeer,
+                                  public UIViewPeerControllerReceiver
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
@@ -545,7 +536,7 @@ private:
     }
 
     //==============================================================================
-    class AsyncRepaintMessage  : public CallbackMessage
+    class AsyncRepaintMessage final : public CallbackMessage
     {
     public:
         UIViewComponentPeer* const peer;
@@ -984,7 +975,7 @@ static bool attemptToConsumeKeys (JuceUIView* view, NSSet<UIPress*>* presses)
     return used;
 }
 
-- (void) pressesBegan:(NSSet<UIPress*>*) presses withEvent:(UIPressesEvent*) event
+- (void) pressesBegan: (NSSet<UIPress*>*) presses withEvent: (UIPressesEvent*) event
 {
     const auto handledEvent = [&]
     {
@@ -1033,13 +1024,13 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
     return false;
 }
 
-- (void) pressesEnded:(NSSet<UIPress*>*) presses withEvent:(UIPressesEvent*) event
+- (void) pressesEnded: (NSSet<UIPress*>*) presses withEvent: (UIPressesEvent*) event
 {
     if (! doKeysUp (owner, presses, event))
         [super pressesEnded: presses withEvent: event];
 }
 
-- (void) pressesCancelled:(NSSet<UIPress*>*) presses withEvent:(UIPressesEvent*) event
+- (void) pressesCancelled: (NSSet<UIPress*>*) presses withEvent: (UIPressesEvent*) event
 {
     if (! doKeysUp (owner, presses, event))
         [super pressesCancelled: presses withEvent: event];
@@ -1929,11 +1920,11 @@ void UIViewComponentPeer::updateScreenBounds()
         {
             // this will re-centre the window, but leave its size unchanged
 
-            auto centreRelX = oldArea.getCentreX() / (float) oldDesktop.getWidth();
-            auto centreRelY = oldArea.getCentreY() / (float) oldDesktop.getHeight();
+            auto centreRelX = (float) oldArea.getCentreX() / (float) oldDesktop.getWidth();
+            auto centreRelY = (float) oldArea.getCentreY() / (float) oldDesktop.getHeight();
 
-            auto x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
-            auto y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
+            auto x = ((int) ((float) newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
+            auto y = ((int) ((float) newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
 
             component.setBounds (oldArea.withPosition (x, y));
         }
@@ -2232,7 +2223,7 @@ void UIViewComponentPeer::drawRectWithContext (CGContextRef cg, CGRect)
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
     CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, getComponent().getHeight()));
-    CoreGraphicsContext g (cg, getComponent().getHeight());
+    CoreGraphicsContext g (cg, (float) getComponent().getHeight());
 
     insideDrawRect = true;
     handlePaint (g);

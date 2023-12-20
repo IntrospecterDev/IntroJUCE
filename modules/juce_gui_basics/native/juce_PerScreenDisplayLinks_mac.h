@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -107,9 +100,9 @@ public:
           link ([display = displayId]
           {
               CVDisplayLinkRef ptr = nullptr;
-              const auto result = CVDisplayLinkCreateWithCGDisplay (display, &ptr);
-              jassertquiet (result == kCVReturnSuccess);
-              jassertquiet (ptr != nullptr);
+              [[maybe_unused]] const auto result = CVDisplayLinkCreateWithCGDisplay (display, &ptr);
+              jassert (result == kCVReturnSuccess);
+              jassert (ptr != nullptr);
               return ptr;
           }()),
           onCallback (std::move (onCallbackIn))
@@ -125,11 +118,11 @@ public:
             return kCVReturnSuccess;
         };
 
-        const auto callbackResult = CVDisplayLinkSetOutputCallback (link.get(), callback, this);
-        jassertquiet (callbackResult == kCVReturnSuccess);
+        [[maybe_unused]] const auto callbackResult = CVDisplayLinkSetOutputCallback (link.get(), callback, this);
+        jassert (callbackResult == kCVReturnSuccess);
 
-        const auto startResult = CVDisplayLinkStart (link.get());
-        jassertquiet (startResult == kCVReturnSuccess);
+        [[maybe_unused]] const auto startResult = CVDisplayLinkStart (link.get());
+        jassert (startResult == kCVReturnSuccess);
     }
 
     ~ScopedDisplayLink() noexcept
@@ -274,9 +267,9 @@ private:
 
                 // This is the callback that will actually fire in response to this screen's display
                 // link callback.
-                result.emplace_back (screen, [callbacks = std::move (callbacks)]
+                result.emplace_back (screen, [cbs = std::move (callbacks)]
                 {
-                    for (const auto& callback : callbacks)
+                    for (const auto& callback : cbs)
                         callback();
                 });
             }

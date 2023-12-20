@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -496,7 +489,7 @@ bool Component::isOpaque() const noexcept
 }
 
 //==============================================================================
-struct StandardCachedComponentImage  : public CachedComponentImage
+struct StandardCachedComponentImage final : public CachedComponentImage
 {
     StandardCachedComponentImage (Component& c) noexcept : owner (c)  {}
 
@@ -884,7 +877,7 @@ void Component::sendMovedResizedMessages (bool wasMoved, bool wasResized)
 
         for (int i = childComponentList.size(); --i >= 0;)
         {
-            childComponentList.getUnchecked(i)->parentSizeChanged();
+            childComponentList.getUnchecked (i)->parentSizeChanged();
 
             if (checker.shouldBailOut())
                 return;
@@ -1911,7 +1904,7 @@ void Component::copyAllExplicitColoursTo (Component& target) const
 
     for (int i = properties.size(); --i >= 0;)
     {
-        auto name = properties.getName(i);
+        auto name = properties.getName (i);
 
         if (name.toString().startsWith (detail::colourPropertyPrefix))
             if (target.properties.set (name, properties [name]))
@@ -2872,7 +2865,7 @@ bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() noexcept
 
 Point<int> Component::getMouseXYRelative() const
 {
-    return getLocalPoint (nullptr, Desktop::getMousePosition());
+    return getLocalPoint (nullptr, Desktop::getMousePositionFloat()).roundToInt();
 }
 
 //==============================================================================

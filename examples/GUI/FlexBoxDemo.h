@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-struct DemoFlexPanel   : public Component
+struct DemoFlexPanel final : public Component
 {
     DemoFlexPanel (Colour col, FlexItem& item)
         : flexItem (item), colour (col)
@@ -163,7 +163,7 @@ struct DemoFlexPanel   : public Component
 };
 
 //==============================================================================
-struct FlexBoxDemo   : public juce::Component
+struct FlexBoxDemo final : public juce::Component
 {
     FlexBoxDemo()
     {

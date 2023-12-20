@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -112,6 +108,18 @@ public:
             if (0 <= index && index < iter.get().index)
                 --iter.get().index;
         });
+    }
+
+    /** Adds a listener that will be automatically removed again when the Guard is destroyed.
+
+        Be very careful to ensure that the ErasedScopeGuard is destroyed or released before the
+        ListenerList is destroyed, otherwise the ErasedScopeGuard may attempt to dereference a
+        dangling pointer when it is destroyed, which will result in a crash.
+    */
+    ErasedScopeGuard addScoped (ListenerClass& listenerToAdd)
+    {
+        add (&listenerToAdd);
+        return ErasedScopeGuard { [this, &listenerToAdd] { remove (&listenerToAdd); } };
     }
 
     /** Returns the number of registered listeners. */
@@ -248,18 +256,18 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    void call (void (ListenerClass::*callbackFunction) ())
+    void call (void (ListenerClass::*callbackFunction)())
     {
         call ([=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
 
-    void callExcluding (ListenerClass* listenerToExclude, void (ListenerClass::*callbackFunction) ())
+    void callExcluding (ListenerClass* listenerToExclude, void (ListenerClass::*callbackFunction)())
     {
         callExcluding (listenerToExclude, [=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
 
     template <class BailOutCheckerType>
-    void callChecked (const BailOutCheckerType& bailOutChecker, void (ListenerClass::*callbackFunction) ())
+    void callChecked (const BailOutCheckerType& bailOutChecker, void (ListenerClass::*callbackFunction)())
     {
         callChecked (bailOutChecker, [=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
@@ -267,7 +275,7 @@ public:
     template <class BailOutCheckerType>
     void callCheckedExcluding (ListenerClass* listenerToExclude,
                                const BailOutCheckerType& bailOutChecker,
-                               void (ListenerClass::*callbackFunction) ())
+                               void (ListenerClass::*callbackFunction)())
     {
         callCheckedExcluding (listenerToExclude, bailOutChecker, [=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }

@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -23,10 +16,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData);
     void overwriteFileIfDifferentOrThrow (const File& file, const String& newData);
 
@@ -70,7 +62,7 @@ namespace build_tools
                               const String& utf8PointerVariable,
                               const StringArray& strings,
                               const StringArray& codeToExecute,
-                              const int indentLevel);
+                              int indentLevel);
 
     String unixStylePath (const String& path);
     String windowsStylePath (const String& path);
@@ -82,5 +74,5 @@ namespace build_tools
     String getRelativePathFrom (const File& file, const File& sourceFolder);
 
     void writeStreamToFile (const File& file, const std::function<void (MemoryOutputStream&)>& writer);
-}
-}
+
+} // namespace juce::build_tools

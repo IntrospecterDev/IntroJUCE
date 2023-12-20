@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -35,7 +28,7 @@ JUCE_DECLARE_UUID_GETTER (IOleInPlaceSite,  "00000119-0000-0000-C000-00000000004
 namespace ActiveXHelpers
 {
     //==============================================================================
-    struct JuceIStorage   : public ComBaseClassHelper<IStorage>
+    struct JuceIStorage final : public ComBaseClassHelper<IStorage>
     {
         JuceIStorage() {}
 
@@ -57,7 +50,7 @@ namespace ActiveXHelpers
     };
 
     //==============================================================================
-    struct JuceOleInPlaceFrame   : public ComBaseClassHelper<IOleInPlaceFrame>
+    struct JuceOleInPlaceFrame final : public ComBaseClassHelper<IOleInPlaceFrame>
     {
         JuceOleInPlaceFrame (HWND hwnd)   : window (hwnd) {}
 
@@ -87,7 +80,7 @@ namespace ActiveXHelpers
     };
 
     //==============================================================================
-    struct JuceIOleInPlaceSite   : public ComBaseClassHelper<IOleInPlaceSite>
+    struct JuceIOleInPlaceSite final : public ComBaseClassHelper<IOleInPlaceSite>
     {
         JuceIOleInPlaceSite (HWND hwnd)
             : window (hwnd),
@@ -139,7 +132,7 @@ namespace ActiveXHelpers
     };
 
     //==============================================================================
-    struct JuceIOleClientSite  : public ComBaseClassHelper<IOleClientSite>
+    struct JuceIOleClientSite final : public ComBaseClassHelper<IOleClientSite>
     {
         JuceIOleClientSite (HWND window)  : inplaceSite (new JuceIOleInPlaceSite (window))
         {}
@@ -165,7 +158,7 @@ namespace ActiveXHelpers
                 *result = static_cast<IOleInPlaceSite*> (inplaceSite);
                 return S_OK;
             }
-            else if (type == __uuidof(IDispatch) && dispatchEventHandler != nullptr)
+            else if (type == __uuidof (IDispatch) && dispatchEventHandler != nullptr)
             {
                 dispatchEventHandler->AddRef();
                 *result = dispatchEventHandler;
@@ -202,7 +195,7 @@ namespace ActiveXHelpers
 
                 auto iidIDispatch = __uuidof (IDispatch);
 
-                if (static_cast<IUnknown*>(eventHandler)->QueryInterface (iidIDispatch, (void**) &newEventHandler) != S_OK
+                if (static_cast<IUnknown*> (eventHandler)->QueryInterface (iidIDispatch, (void**) &newEventHandler) != S_OK
                     || newEventHandler == nullptr)
                     return;
 

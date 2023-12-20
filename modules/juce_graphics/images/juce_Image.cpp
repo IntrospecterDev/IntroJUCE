@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -26,6 +19,63 @@
 namespace juce
 {
 
+//==============================================================================
+
+class SubsectionPixelData : public ImagePixelData
+{
+public:
+    SubsectionPixelData(ImagePixelData::Ptr source, Rectangle<int> r)
+        : ImagePixelData(source->pixelFormat, r.getWidth(), r.getHeight()),
+        sourceImage(std::move(source)), area(r)
+    {
+    }
+
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
+    {
+        auto g = sourceImage->createLowLevelContext();
+        g->clipToRectangle(area);
+        g->setOrigin(area.getPosition());
+        return g;
+    }
+
+    void initialiseBitmapData(Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    {
+        sourceImage->initialiseBitmapData(bitmap, x + area.getX(), y + area.getY(), mode);
+
+        if (mode != Image::BitmapData::readOnly)
+            sendDataChangeMessage();
+    }
+
+    ImagePixelData::Ptr clone() override
+    {
+        jassert(getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
+        auto type = createType();
+
+        Image newImage(type->create(pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
+
+        {
+            Graphics g(newImage);
+            g.drawImageAt(Image(*this), 0, 0);
+        }
+
+        return *newImage.getPixelData();
+    }
+
+    std::unique_ptr<ImageType> createType() const override { return sourceImage->createType(); }
+
+    /* as we always hold a reference to image, don't double count */
+    int getSharedCount() const noexcept override { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
+
+private:
+    friend class Image;
+    const ImagePixelData::Ptr sourceImage;
+    const Rectangle<int> area;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SubsectionPixelData)
+};
+
+//==============================================================================
+
 ImagePixelData::ImagePixelData (Image::PixelFormat format, int w, int h)
     : pixelFormat (format), width (w), height (h)
 {
@@ -36,6 +86,11 @@ ImagePixelData::ImagePixelData (Image::PixelFormat format, int w, int h)
 ImagePixelData::~ImagePixelData()
 {
     listeners.call ([this] (Listener& l) { l.imageDataBeingDeleted (this); });
+}
+
+ImagePixelData::Ptr ImagePixelData::clip(Rectangle<int> sourceArea)
+{
+    return new SubsectionPixelData{ this, sourceArea };
 }
 
 void ImagePixelData::sendDataChangeMessage()
@@ -139,6 +194,7 @@ int SoftwareImageType::getTypeID() const
 
 //==============================================================================
 NativeImageType::NativeImageType() {}
+NativeImageType::NativeImageType(float scaleFactor_) : scaleFactor(scaleFactor_) {}
 NativeImageType::~NativeImageType() {}
 
 int NativeImageType::getTypeID() const
@@ -146,7 +202,7 @@ int NativeImageType::getTypeID() const
     return 1;
 }
 
-#if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
+#if JUCE_LINUX || JUCE_BSD
 ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
     return new SoftwarePixelData (format, width, height, clearImage);
@@ -154,58 +210,6 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 #endif
 
 //==============================================================================
-class SubsectionPixelData  : public ImagePixelData
-{
-public:
-    SubsectionPixelData (ImagePixelData::Ptr source, Rectangle<int> r)
-        : ImagePixelData (source->pixelFormat, r.getWidth(), r.getHeight()),
-          sourceImage (std::move (source)), area (r)
-    {
-    }
-
-    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
-    {
-        auto g = sourceImage->createLowLevelContext();
-        g->clipToRectangle (area);
-        g->setOrigin (area.getPosition());
-        return g;
-    }
-
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
-    {
-        sourceImage->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
-
-        if (mode != Image::BitmapData::readOnly)
-            sendDataChangeMessage();
-    }
-
-    ImagePixelData::Ptr clone() override
-    {
-        jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
-        auto type = createType();
-
-        Image newImage (type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
-
-        {
-            Graphics g (newImage);
-            g.drawImageAt (Image (*this), 0, 0);
-        }
-
-        return *newImage.getPixelData();
-    }
-
-    std::unique_ptr<ImageType> createType() const override          { return sourceImage->createType(); }
-
-    /* as we always hold a reference to image, don't double count */
-    int getSharedCount() const noexcept override    { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
-
-private:
-    friend class Image;
-    const ImagePixelData::Ptr sourceImage;
-    const Rectangle<int> area;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubsectionPixelData)
-};
 
 Image Image::getClippedImage (const Rectangle<int>& area) const
 {
@@ -217,7 +221,7 @@ Image Image::getClippedImage (const Rectangle<int>& area) const
     if (validArea.isEmpty())
         return {};
 
-    return Image (*new SubsectionPixelData (image, validArea));
+    return Image{ image->clip(validArea) };
 }
 
 
@@ -268,6 +272,12 @@ Image::~Image()
 }
 
 int Image::getReferenceCount() const noexcept           { return image == nullptr ? 0 : image->getSharedCount(); }
+
+bool Image::isValid() const noexcept
+{
+    return image && image->isValid();
+}
+
 int Image::getWidth() const noexcept                    { return image == nullptr ? 0 : image->width; }
 int Image::getHeight() const noexcept                   { return image == nullptr ? 0 : image->height; }
 Rectangle<int> Image::getBounds() const noexcept        { return image == nullptr ? Rectangle<int>() : Rectangle<int> (image->width, image->height); }

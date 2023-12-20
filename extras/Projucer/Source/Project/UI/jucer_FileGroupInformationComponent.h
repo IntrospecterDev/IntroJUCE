@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -27,9 +20,9 @@
 
 
 //==============================================================================
-class FileGroupInformationComponent  : public Component,
-                                       private ListBoxModel,
-                                       private ValueTree::Listener
+class FileGroupInformationComponent final : public Component,
+                                            private ListBoxModel,
+                                            private ValueTree::Listener
 {
 public:
     FileGroupInformationComponent (const Project::Item& group)
@@ -126,7 +119,7 @@ private:
     }
 
     //==============================================================================
-    class FileOptionComponent  : public Component
+    class FileOptionComponent final : public Component
     {
     public:
         FileOptionComponent (const Project::Item& fileItem, ListBoxHeader* listBoxHeader)
@@ -203,8 +196,8 @@ private:
 
     private:
         //==============================================================================
-        class CompilerFlagSchemeSelector  : public Component,
-                                            private Value::Listener
+        class CompilerFlagSchemeSelector final : public Component,
+                                                 private Value::Listener
         {
         public:
             CompilerFlagSchemeSelector (Project::Item& it)

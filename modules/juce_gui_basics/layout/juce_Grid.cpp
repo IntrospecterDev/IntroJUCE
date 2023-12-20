@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -281,9 +274,9 @@ struct Grid::Helpers
             const auto lines = getArrayOfLinesFromTracks (tracks);
             int count = 0;
 
-            for (int i = 0; i < lines.size(); i++)
+            for (const auto [index, line] : enumerate (lines))
             {
-                for (const auto& name : lines.getReference (i).lineNames)
+                for (const auto& name : line.lineNames)
                 {
                     if (prop.getName() == name)
                     {
@@ -293,7 +286,7 @@ struct Grid::Helpers
                 }
 
                 if (count == prop.getNumber())
-                    return i + 1;
+                    return (int) index + 1;
             }
 
             jassertfalse;
@@ -328,9 +321,11 @@ struct Grid::Helpers
             const auto lines = getArrayOfLinesFromTracks (tracks);
             int count = 0;
 
-            for (int i = startLineNumber; i < lines.size(); i++)
+            const auto enumerated = enumerate (lines);
+
+            for (const auto [index, line] : makeRange (enumerated.begin() + startLineNumber, enumerated.end()))
             {
-                for (const auto& name : lines.getReference (i).lineNames)
+                for (const auto& name : line.lineNames)
                 {
                     if (propertyWithSpan.getName() == name)
                     {
@@ -340,7 +335,7 @@ struct Grid::Helpers
                 }
 
                 if (count == propertyWithSpan.getNumber())
-                    return i + 1;
+                    return (int) index + 1;
             }
 
             jassertfalse;
@@ -545,31 +540,31 @@ struct Grid::Helpers
 
             if (alignContent == AlignContent::spaceBetween)
             {
-                const auto shift = ((float) (rowNumber - 1) * (calculation.remainingHeight / float(numberOfRows - 1)));
+                const auto shift = ((float) (rowNumber - 1) * (calculation.remainingHeight / float (numberOfRows - 1)));
                 area.setY (area.getY() + shift);
             }
 
             if (justifyContent == JustifyContent::spaceBetween)
             {
-                const auto shift = ((float) (columnNumber - 1) * (calculation.remainingWidth / float(numberOfColumns - 1)));
+                const auto shift = ((float) (columnNumber - 1) * (calculation.remainingWidth / float (numberOfColumns - 1)));
                 area.setX (area.getX() + shift);
             }
 
             if (alignContent == AlignContent::spaceEvenly)
             {
-                const auto shift = ((float) rowNumber * (calculation.remainingHeight / float(numberOfRows + 1)));
+                const auto shift = ((float) rowNumber * (calculation.remainingHeight / float (numberOfRows + 1)));
                 area.setY (area.getY() + shift);
             }
 
             if (justifyContent == JustifyContent::spaceEvenly)
             {
-                const auto shift = ((float) columnNumber * (calculation.remainingWidth / float(numberOfColumns + 1)));
+                const auto shift = ((float) columnNumber * (calculation.remainingWidth / float (numberOfColumns + 1)));
                 area.setX (area.getX() + shift);
             }
 
             if (alignContent == AlignContent::spaceAround)
             {
-                const auto inbetweenShift = calculation.remainingHeight / float(numberOfRows);
+                const auto inbetweenShift = calculation.remainingHeight / float (numberOfRows);
                 const auto sidesShift = inbetweenShift / 2;
                 auto shift = (float) (rowNumber - 1) * inbetweenShift + sidesShift;
 
@@ -578,7 +573,7 @@ struct Grid::Helpers
 
             if (justifyContent == JustifyContent::spaceAround)
             {
-                const auto inbetweenShift = calculation.remainingWidth / float(numberOfColumns);
+                const auto inbetweenShift = calculation.remainingWidth / float (numberOfColumns);
                 const auto sidesShift = inbetweenShift / 2;
                 auto shift = (float) (columnNumber - 1) * inbetweenShift + sidesShift;
 
@@ -1158,7 +1153,7 @@ void Grid::performLayout (Rectangle<int> targetArea)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct GridTests  : public UnitTest
+struct GridTests final : public UnitTest
 {
     GridTests()
         : UnitTest ("Grid", UnitTestCategories::gui)

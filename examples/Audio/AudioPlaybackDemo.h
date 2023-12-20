@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -48,12 +48,12 @@
 
 #include "../Assets/DemoUtilities.h"
 
-class DemoThumbnailComp  : public Component,
-                           public ChangeListener,
-                           public FileDragAndDropTarget,
-                           public ChangeBroadcaster,
-                           private ScrollBar::Listener,
-                           private Timer
+class DemoThumbnailComp final : public Component,
+                                public ChangeListener,
+                                public FileDragAndDropTarget,
+                                public ChangeBroadcaster,
+                                private ScrollBar::Listener,
+                                private Timer
 {
 public:
     DemoThumbnailComp (AudioFormatManager& formatManager,
@@ -251,13 +251,13 @@ private:
 };
 
 //==============================================================================
-class AudioPlaybackDemo  : public Component,
-                          #if (JUCE_ANDROID || JUCE_IOS)
-                           private Button::Listener,
-                          #else
-                           private FileBrowserListener,
-                          #endif
-                           private ChangeListener
+class AudioPlaybackDemo final : public Component,
+                               #if (JUCE_ANDROID || JUCE_IOS)
+                                private Button::Listener,
+                               #else
+                                private FileBrowserListener,
+                               #endif
+                                private ChangeListener
 {
 public:
     AudioPlaybackDemo()

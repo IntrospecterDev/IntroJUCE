@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -65,8 +61,8 @@ enum
 const char* const javaAudioTypeName = "Android Audio";
 
 //==============================================================================
-class AndroidAudioIODevice  : public AudioIODevice,
-                              public Thread
+class AndroidAudioIODevice final : public AudioIODevice,
+                                   public Thread
 {
 public:
     //==============================================================================
@@ -191,9 +187,9 @@ public:
         if (numClientOutputChannels > 0)
         {
             numDeviceOutputChannels = 2;
-            outputDevice = GlobalRef (LocalRef<jobject>(env->NewObject (AudioTrack, AudioTrack.constructor,
-                                                                        STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
-                                                                        (jint) (minBufferSizeOut * numDeviceOutputChannels * static_cast<int> (sizeof (int16))), MODE_STREAM)));
+            outputDevice = GlobalRef (LocalRef<jobject> (env->NewObject (AudioTrack, AudioTrack.constructor,
+                                                                         STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
+                                                                         (jint) (minBufferSizeOut * numDeviceOutputChannels * static_cast<int> (sizeof (int16))), MODE_STREAM)));
 
             const bool supportsUnderrunCount = (getAndroidSDKVersion() >= 24);
             getUnderrunCount = supportsUnderrunCount ? env->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : nullptr;
@@ -225,11 +221,11 @@ public:
             else
             {
                 numDeviceInputChannels = jmin (numClientInputChannels, numDeviceInputChannelsAvailable);
-                inputDevice = GlobalRef (LocalRef<jobject>(env->NewObject (AudioRecord, AudioRecord.constructor,
-                                                                           0 /* (default audio source) */, sampleRate,
-                                                                           numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
-                                                                           ENCODING_PCM_16BIT,
-                                                                           (jint) (minBufferSizeIn * numDeviceInputChannels * static_cast<int> (sizeof (int16))))));
+                inputDevice = GlobalRef (LocalRef<jobject> (env->NewObject (AudioRecord, AudioRecord.constructor,
+                                                                            0 /* (default audio source) */, sampleRate,
+                                                                            numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
+                                                                            ENCODING_PCM_16BIT,
+                                                                            (jint) (minBufferSizeIn * numDeviceInputChannels * static_cast<int> (sizeof (int16))))));
 
                 int inputDeviceState = env->CallIntMethod (inputDevice, AudioRecord.getState);
                 if (inputDeviceState > 0)
@@ -429,10 +425,10 @@ private:
 };
 
 //==============================================================================
-class AndroidAudioIODeviceType  : public AudioIODeviceType
+class AndroidAudioIODeviceType final : public AudioIODeviceType
 {
 public:
-    AndroidAudioIODeviceType()  : AudioIODeviceType (javaAudioTypeName) {}
+    AndroidAudioIODeviceType() : AudioIODeviceType (javaAudioTypeName) {}
 
     //==============================================================================
     void scanForDevices() {}

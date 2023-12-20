@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -134,10 +127,10 @@ namespace
        #if JUCE_DEBUG
         const int maxVal = 0x3fffffff;
 
-        jassertquiet ((int) x >= -maxVal && (int) x <= maxVal
-                   && (int) y >= -maxVal && (int) y <= maxVal
-                   && (int) w >= 0 && (int) w <= maxVal
-                   && (int) h >= 0 && (int) h <= maxVal);
+        jassert ((int) x >= -maxVal && (int) x <= maxVal
+              && (int) y >= -maxVal && (int) y <= maxVal
+              && (int) w >= 0 && (int) w <= maxVal
+              && (int) h >= 0 && (int) h <= maxVal);
        #endif
 
         return { x, y, w, h };
@@ -572,6 +565,11 @@ void Graphics::strokePath (const Path& path,
                            const PathStrokeType& strokeType,
                            const AffineTransform& transform) const
 {
+    if (context.drawPath(path, strokeType, transform))
+    {
+        return;
+    }
+
     Path stroke;
     strokeType.createStrokedPath (stroke, path, transform, context.getPhysicalPixelScaleFactor());
     fillPath (stroke);
@@ -597,6 +595,11 @@ void Graphics::drawRect (Rectangle<float> r, const float lineThickness) const
 {
     jassert (r.getWidth() >= 0.0f && r.getHeight() >= 0.0f);
 
+    if (context.drawRect(r, lineThickness))
+    {
+        return;
+    }
+
     RectangleList<float> rects;
     rects.addWithoutMerging (r.removeFromTop    (lineThickness));
     rects.addWithoutMerging (r.removeFromBottom (lineThickness));
@@ -608,6 +611,11 @@ void Graphics::drawRect (Rectangle<float> r, const float lineThickness) const
 //==============================================================================
 void Graphics::fillEllipse (Rectangle<float> area) const
 {
+    if (context.fillEllipse(area))
+    {
+        return;
+    }
+
     Path p;
     p.addEllipse (area);
     fillPath (p);
@@ -625,6 +633,11 @@ void Graphics::drawEllipse (float x, float y, float width, float height, float l
 
 void Graphics::drawEllipse (Rectangle<float> area, float lineThickness) const
 {
+    if (context.drawEllipse(area, lineThickness))
+    {
+        return;
+    }
+
     Path p;
 
     if (approximatelyEqual (area.getWidth(), area.getHeight()))
@@ -649,6 +662,11 @@ void Graphics::fillRoundedRectangle (float x, float y, float width, float height
 
 void Graphics::fillRoundedRectangle (Rectangle<float> r, const float cornerSize) const
 {
+    if (context.fillRoundedRectangle(r, cornerSize))
+    {
+        return;
+    }
+
     Path p;
     p.addRoundedRectangle (r, cornerSize);
     fillPath (p);
@@ -662,6 +680,11 @@ void Graphics::drawRoundedRectangle (float x, float y, float width, float height
 
 void Graphics::drawRoundedRectangle (Rectangle<float> r, float cornerSize, float lineThickness) const
 {
+    if (context.drawRoundedRectangle(r, cornerSize, lineThickness))
+    {
+        return;
+    }
+
     Path p;
     p.addRoundedRectangle (r, cornerSize);
     strokePath (p, PathStrokeType (lineThickness));
@@ -751,6 +774,11 @@ void Graphics::drawLine (float x1, float y1, float x2, float y2, float lineThick
 
 void Graphics::drawLine (Line<float> line, const float lineThickness) const
 {
+    if (context.drawLineWithThickness(line, lineThickness))
+    {
+        return;
+    }
+
     Path p;
     p.addLineSegment (line, lineThickness);
     fillPath (p);

@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -1591,7 +1584,7 @@ Button* LookAndFeel_V2::createSliderButton (Slider&, const bool isIncrement)
     return new TextButton (isIncrement ? "+" : "-", String());
 }
 
-class LookAndFeel_V2::SliderLabelComp  : public Label
+class LookAndFeel_V2::SliderLabelComp final : public Label
 {
 public:
     SliderLabelComp() : Label ({}, {}) {}
@@ -1745,7 +1738,7 @@ void LookAndFeel_V2::drawTooltip (Graphics& g, const String& text, int width, in
 //==============================================================================
 Button* LookAndFeel_V2::createFilenameComponentBrowseButton (const String& text)
 {
-    return new TextButton (text, TRANS("click to browse for a different file"));
+    return new TextButton (text, TRANS ("click to browse for a different file"));
 }
 
 void LookAndFeel_V2::layoutFilenameComponent (FilenameComponent& filenameComp,
@@ -1912,7 +1905,7 @@ void LookAndFeel_V2::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
 }
 
 //==============================================================================
-class LookAndFeel_V2::GlassWindowButton   : public Button
+class LookAndFeel_V2::GlassWindowButton final : public Button
 {
 public:
     GlassWindowButton (const String& name, Colour col,
@@ -2062,7 +2055,7 @@ std::unique_ptr<DropShadower> LookAndFeel_V2::createDropShadowerForComponent (Co
 
 std::unique_ptr<FocusOutline> LookAndFeel_V2::createFocusOutlineForComponent (Component&)
 {
-    struct WindowProperties  : public FocusOutline::OutlineWindowProperties
+    struct WindowProperties final : public FocusOutline::OutlineWindowProperties
     {
         Rectangle<int> getOutlineBounds (Component& c) override
         {

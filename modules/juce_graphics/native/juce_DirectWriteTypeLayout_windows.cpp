@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -26,10 +19,9 @@
 namespace juce
 {
 
-#if JUCE_USE_DIRECTWRITE
 namespace DirectWriteTypeLayout
 {
-    class CustomDirectWriteTextRenderer   : public ComBaseClassHelper<IDWriteTextRenderer>
+    class CustomDirectWriteTextRenderer final : public ComBaseClassHelper<IDWriteTextRenderer>
     {
     public:
         CustomDirectWriteTextRenderer (IDWriteFontCollection& fonts, const AttributedString& as)
@@ -191,7 +183,7 @@ namespace DirectWriteTypeLayout
         {
             for (int i = 0; i < attributedString.getNumAttributes(); ++i)
             {
-                auto& font = attributedString.getAttribute(i).font;
+                auto& font = attributedString.getAttribute (i).font;
                 auto typeface = font.getTypefacePtr();
 
                 if (auto* wt = dynamic_cast<WindowsDirectWriteTypeface*> (typeface.get()))
@@ -239,7 +231,7 @@ namespace DirectWriteTypeLayout
             case Justification::left:                   break;
             case Justification::right:                  alignment = DWRITE_TEXT_ALIGNMENT_TRAILING; break;
             case Justification::horizontallyCentred:    alignment = DWRITE_TEXT_ALIGNMENT_CENTER; break;
-            case Justification::horizontallyJustified:  break; // DirectWrite cannot justify text, default to left alignment
+            case Justification::horizontallyJustified:  alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED; break;
             default:                                    jassertfalse; break; // Illegal justification flags
         }
 
@@ -444,24 +436,44 @@ namespace DirectWriteTypeLayout
         }
     }
 
-    static inline void drawToD2DContext (const AttributedString& text,
-                                         const Rectangle<float>& area,
-                                         ID2D1RenderTarget& renderTarget,
+    static inline ComSmartPtr<IDWriteTextLayout> createDirectWriteTextLayout(const AttributedString& text,
+        Rectangle<float>& area,
                                          IDWriteFactory& directWriteFactory,
-                                         IDWriteFontCollection& fontCollection)
+        IDWriteFontCollection& fontCollection,
+        ID2D1RenderTarget& renderTarget)
     {
         ComSmartPtr<IDWriteTextLayout> dwTextLayout;
 
         if (setupLayout (text, area.getWidth(), area.getHeight(), renderTarget,
                          directWriteFactory, fontCollection, dwTextLayout))
         {
-            ComSmartPtr<ID2D1SolidColorBrush> d2dBrush;
-            renderTarget.CreateSolidColorBrush (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f),
-                                                d2dBrush.resetAndGetPointerAddress());
+            //
+            // Calling SetParagraphAlignment for vertical alignment didn't work with some of the text layouts in the JUCE demo;
+            // do it manually here instead.
+            //
+            switch (text.getJustification().getOnlyVerticalFlags())
+            {
+            case Justification::verticallyCentred:
+            {
+                DWRITE_TEXT_METRICS metrics;
+                dwTextLayout->GetMetrics(&metrics);
+                area.translate(0.0f, ((float)area.getHeight() - metrics.height) * 0.5f);
+                break;
+            }
 
-            renderTarget.DrawTextLayout (D2D1::Point2F ((float) area.getX(), (float) area.getY()),
-                                         dwTextLayout, d2dBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+            case Justification::bottom:
+            {
+                DWRITE_TEXT_METRICS metrics;
+                dwTextLayout->GetMetrics(&metrics);
+                area.translate(0.0f, (float)area.getHeight() - metrics.height);
+                break;
         }
+    }
+
+            return dwTextLayout;
+        }
+
+        return {};
     }
 }
 
@@ -481,29 +493,31 @@ static bool canAllTypefacesAndFontsBeUsedInLayout (const AttributedString& text)
     return true;
 }
 
-#endif
 
 bool TextLayout::createNativeLayout ([[maybe_unused]] const AttributedString& text)
 {
-   #if JUCE_USE_DIRECTWRITE
     if (! canAllTypefacesAndFontsBeUsedInLayout (text))
         return false;
 
-    SharedResourcePointer<Direct2DFactories> factories;
+    jassert(MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-    if (factories->d2dFactory != nullptr
-        && factories->directWriteFactory != nullptr
-        && factories->systemFonts != nullptr
-        && factories->directWriteRenderTarget != nullptr)
+    SharedResourcePointer<DirectX> directX;
+    auto d2dFactory = directX->direct2D.getFactory();
+    auto directWriteFactory = directX->directWrite.getFactory();
+    auto systemFonts = directX->directWrite.getSystemFonts();
+    auto directWriteRenderTarget = directX->direct2D.getDirectWriteRenderTarget();
+    if (d2dFactory != nullptr
+        && directWriteFactory
+        && systemFonts
+        && directWriteRenderTarget)
     {
         DirectWriteTypeLayout::createLayout (*this, text,
-                                             *factories->directWriteFactory,
-                                             *factories->systemFonts,
-                                             *factories->directWriteRenderTarget);
+            *directWriteFactory,
+            *systemFonts,
+            *directWriteRenderTarget);
 
         return true;
     }
-   #endif
 
     return false;
 }

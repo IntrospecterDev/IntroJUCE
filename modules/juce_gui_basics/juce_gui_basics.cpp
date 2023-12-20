@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -68,7 +61,14 @@
  #include <commdlg.h>
  #include <commctrl.h>
  #include <sapi.h>
- #include <dxgi.h>
+ #include <dxgi1_2.h>
+ #include <d2d1_2.h>
+ #include <d3d11_1.h>
+
+#if JUCE_ETW_TRACELOGGING
+#include <evntrace.h>
+#include <TraceLoggingProvider.h>
+#endif
 
  #if JUCE_MINGW
   // Some MinGW headers use 'new' as a parameter name
@@ -99,10 +99,11 @@
    #pragma comment(lib, "GlU32.Lib")
   #endif
 
-  #if JUCE_DIRECT2D
-   #pragma comment (lib, "Dwrite.lib")
-   #pragma comment (lib, "D2d1.lib")
-  #endif
+ #pragma comment (lib, "Dwrite.lib")
+ #pragma comment (lib, "D2d1.lib")
+ #pragma comment (lib, "DXGI.lib")
+ #pragma comment (lib, "D3D11.lib")
+ #pragma comment (lib, "DComp.lib")
  #endif
 #endif
 
@@ -167,6 +168,8 @@
  #include "native/juce_MouseCursor_mac.mm"
 
 #elif JUCE_WINDOWS
+ #include "../juce_graphics/native/juce_ETW_windows.h"
+ #include "../juce_graphics/native/juce_DirectX_windows.h"
  #include "native/accessibility/juce_ComInterfaces_windows.h"
  #include "native/accessibility/juce_WindowsUIAWrapper_windows.h"
  #include "native/accessibility/juce_AccessibilityElement_windows.h"
@@ -175,6 +178,7 @@
  #include "native/accessibility/juce_AccessibilityElement_windows.cpp"
  #include "native/accessibility/juce_Accessibility_windows.cpp"
  #include "native/juce_WindowsHooks_windows.h"
+ #include "native/juce_VBlank_windows.h"
  #include "native/juce_WindowUtils_windows.cpp"
  #include "native/juce_Windowing_windows.cpp"
  #include "native/juce_WindowsHooks_windows.cpp"
@@ -352,3 +356,4 @@
 #include "windows/juce_TooltipWindow.cpp"
 #include "windows/juce_TopLevelWindow.cpp"
 #include "windows/juce_VBlankAttachment.cpp"
+#include "windows/juce_NativeScaleFactorNotifier.cpp"

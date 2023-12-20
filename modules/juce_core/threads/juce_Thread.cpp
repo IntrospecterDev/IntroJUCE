@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -48,7 +44,7 @@ Thread::~Thread()
 //==============================================================================
 // Use a ref-counted object to hold this shared data, so that it can outlive its static
 // shared pointer when threads are still running during static shutdown.
-struct CurrentThreadHolder   : public ReferenceCountedObject
+struct CurrentThreadHolder final : public ReferenceCountedObject
 {
     CurrentThreadHolder() noexcept {}
 
@@ -296,7 +292,7 @@ void Thread::notify() const
 }
 
 //==============================================================================
-struct LambdaThread  : public Thread
+struct LambdaThread final : public Thread
 {
     LambdaThread (std::function<void()>&& f) : Thread ("anonymous"), fn (std::move (f)) {}
 
@@ -354,7 +350,7 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger() noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AtomicTests  : public UnitTest
+class AtomicTests final : public UnitTest
 {
 public:
     AtomicTests()
@@ -366,9 +362,9 @@ public:
         beginTest ("Misc");
 
         char a1[7];
-        expect (numElementsInArray(a1) == 7);
+        expect (numElementsInArray (a1) == 7);
         int a2[3];
-        expect (numElementsInArray(a2) == 3);
+        expect (numElementsInArray (a2) == 3);
 
         expect (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
         expect (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);
@@ -478,8 +474,8 @@ public:
 static AtomicTests atomicUnitTests;
 
 //==============================================================================
-class ThreadLocalValueUnitTest  : public UnitTest,
-                                  private Thread
+class ThreadLocalValueUnitTest final : public UnitTest,
+                                       private Thread
 {
 public:
     ThreadLocalValueUnitTest()

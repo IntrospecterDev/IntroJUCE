@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -139,14 +135,14 @@ Array<JNIClassBase*>& JNIClassBase::getClasses()
 static File getCodeCacheDirectory()
 {
     int pid = getpid();
-    File cmdline("/proc/" + String(pid) + "/cmdline");
+    File cmdline ("/proc/" + String (pid) + "/cmdline");
 
     auto bundleId = cmdline.loadFileAsString().trimStart().trimEnd();
 
     if (bundleId.isEmpty())
         return {};
 
-    return File("/data/data/" + bundleId + "/code_cache");
+    return File ("/data/data/" + bundleId + "/code_cache");
 }
 
 void JNIClassBase::initialise (JNIEnv* env, jobject context)
@@ -279,14 +275,14 @@ void JNIClassBase::initialiseAllClasses (JNIEnv* env, jobject context)
 {
     const Array<JNIClassBase*>& classes = getClasses();
     for (int i = classes.size(); --i >= 0;)
-        classes.getUnchecked(i)->initialise (env, context);
+        classes.getUnchecked (i)->initialise (env, context);
 }
 
 void JNIClassBase::releaseAllClasses (JNIEnv* env)
 {
     const Array<JNIClassBase*>& classes = getClasses();
     for (int i = classes.size(); --i >= 0;)
-        classes.getUnchecked(i)->release (env);
+        classes.getUnchecked (i)->release (env);
 }
 
 jmethodID JNIClassBase::resolveMethod (JNIEnv* env, const char* methodName, const char* params)

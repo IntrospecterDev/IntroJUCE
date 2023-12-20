@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -83,7 +83,7 @@ struct GainDemoDSP
     std::vector<DSPDemoParameterBase*> parameters { &gainParam };
 };
 
-struct GainDemo    : public Component
+struct GainDemo final : public Component
 {
     GainDemo()
     {

@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -1631,7 +1624,7 @@ private:
                     env->CallVoidMethod (captureRequestBuilder, CaptureRequestBuilder.addTarget, surface.get());
                 }
 
-                previewCaptureRequest = GlobalRef (LocalRef<jobject>(env->CallObjectMethod (captureRequestBuilder, CaptureRequestBuilder.build)));
+                previewCaptureRequest = GlobalRef (LocalRef<jobject> (env->CallObjectMethod (captureRequestBuilder, CaptureRequestBuilder.build)));
 
                 env->CallIntMethod (captureSession, CameraCaptureSession.setRepeatingRequest,
                                     previewCaptureRequest.get(), nullptr, handlerToUse.get());
@@ -1687,7 +1680,7 @@ private:
                 {
                     JUCE_CAMERA_LOG ("Taking picture...");
 
-                    stillPictureCaptureRequest = GlobalRef (LocalRef<jobject>(stillPictureCaptureRequestToUse));
+                    stillPictureCaptureRequest = GlobalRef (LocalRef<jobject> (stillPictureCaptureRequestToUse));
 
                     lockFocus();
                 }
@@ -2932,16 +2925,14 @@ private:
 
     void cameraDeviceError (const String& error)
     {
-        if (owner.onErrorOccurred != nullptr)
-            owner.onErrorOccurred (error);
+        NullCheckedInvocation::invoke (owner.onErrorOccurred, error);
     }
 
     void invokeCameraOpenCallback (const String& error)
     {
         JUCE_CAMERA_LOG ("invokeCameraOpenCallback(), error = " + error);
 
-        if (cameraOpenCallback != nullptr)
-            cameraOpenCallback (cameraId, error);
+        NullCheckedInvocation::invoke (cameraOpenCallback, cameraId, error);
     }
 
     //==============================================================================
@@ -2955,8 +2946,7 @@ private:
     {
         JUCE_CAMERA_LOG ("notifyPictureTaken()");
 
-        if (pictureTakenCallback != nullptr)
-            pictureTakenCallback (image);
+        NullCheckedInvocation::invoke (pictureTakenCallback, image);
     }
 
     void triggerStillPictureCapture()
@@ -3097,7 +3087,7 @@ private:
         auto quitSafelyMethod = env->GetMethodID (AndroidHandlerThread, "quitSafely", "()Z");
 
         // this code will only run on SDK >= 21
-        jassert(quitSafelyMethod != nullptr);
+        jassert (quitSafelyMethod != nullptr);
 
         env->CallBooleanMethod (handlerThread, quitSafelyMethod);
         env->CallVoidMethod (handlerThread, AndroidHandlerThread.join);

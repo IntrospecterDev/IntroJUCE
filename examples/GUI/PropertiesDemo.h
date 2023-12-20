@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class DemoButtonPropertyComponent : public ButtonPropertyComponent
+class DemoButtonPropertyComponent final : public ButtonPropertyComponent
 {
 public:
     DemoButtonPropertyComponent (const String& propertyName)
@@ -80,13 +80,13 @@ private:
 };
 
 //==============================================================================
-class DemoSliderPropertyComponent : public SliderPropertyComponent
+class DemoSliderPropertyComponent final : public SliderPropertyComponent
 {
 public:
     DemoSliderPropertyComponent (const String& propertyName)
         : SliderPropertyComponent (propertyName, 0.0, 100.0, 0.001)
     {
-        setValue (Random::getSystemRandom().nextDouble() * 42.0);
+        slider.setValue (Random::getSystemRandom().nextDouble() * 42.0);
     }
 
     void setValue (double newValue) override
@@ -162,8 +162,8 @@ static Array<PropertyComponent*> createChoices (int howMany)
 }
 
 //==============================================================================
-class PropertiesDemo   : public Component,
-                         private Timer
+class PropertiesDemo final : public Component,
+                             private Timer
 {
 public:
     PropertiesDemo()

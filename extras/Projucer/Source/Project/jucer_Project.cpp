@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -261,14 +254,6 @@ void Project::updateDeprecatedProjectSettings()
         exporter->updateDeprecatedSettings();
 }
 
-void Project::updateDeprecatedProjectSettingsInteractively()
-{
-    jassert (! ProjucerApplication::getApp().isRunningCommandLine);
-
-    for (ExporterIterator exporter (*this); exporter.next();)
-        exporter->updateDeprecatedSettingsInteractively();
-}
-
 void Project::initialiseMainGroup()
 {
     // Create main file group if missing
@@ -340,7 +325,7 @@ void Project::initialiseAudioPluginValues()
 
     pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(),
                                               Array<var> (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
-    pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var> (), ",");
+    pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var>(), ",");
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
     pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc,                 getUndoManager(), getProjectNameString());
@@ -462,8 +447,8 @@ void Project::removeDefunctExporters()
             warningMessage << "\n"
                            << TRANS ("These exporters have been removed from the project. If you save the project they will be also erased from the .jucer file.");
 
-            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
-            messageBox = AlertWindow::showScopedAsync (options, nullptr);
+            exporterRemovalMessageBoxOptions = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
+            messageBoxQueueListenerScope = messageBoxQueue.addListener (*this);
         }
     }
 }
@@ -712,9 +697,9 @@ Result Project::loadDocument (const File& file)
     return Result::ok();
 }
 
-Result Project::saveDocument (const File& file)
+Result Project::saveDocument ([[maybe_unused]] const File& file)
 {
-    jassertquiet (file == getFile());
+    jassert (file == getFile());
 
     auto sharedResult = Result::ok();
 
@@ -726,9 +711,10 @@ Result Project::saveDocument (const File& file)
     return sharedResult;
 }
 
-void Project::saveDocumentAsync (const File& file, std::function<void (Result)> afterSave)
+void Project::saveDocumentAsync ([[maybe_unused]] const File& file,
+                                 std::function<void (Result)> afterSave)
 {
-    jassertquiet (file == getFile());
+    jassert (file == getFile());
 
     saveProject (Async::yes, nullptr, std::move (afterSave));
 }
@@ -1168,6 +1154,14 @@ void Project::valueTreeChildAddedOrRemoved (ValueTree& parent, ValueTree& child)
     changed();
 }
 
+void Project::canCreateMessageBox (CreatorFunction f)
+{
+    messageBox = f (*exporterRemovalMessageBoxOptions, [this] (auto)
+                                                       {
+                                                           messageBoxQueueListenerScope.reset();
+                                                       });
+}
+
 void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
 {
     valueTreeChildAddedOrRemoved (parent, child);
@@ -1263,6 +1257,7 @@ const build_tools::ProjectType& Project::getProjectType() const
 
     auto* guiType = build_tools::ProjectType::findType (build_tools::ProjectType_GUIApp::getTypeName());
     jassert (guiType != nullptr);
+    // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.UndefReturn)
     return *guiType;
 }
 
@@ -1413,8 +1408,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
         for (int i = 0; i < types.size(); ++i)
         {
-            projectTypeNames.add (types.getUnchecked(i)->getDescription());
-            projectTypeCodes.add (types.getUnchecked(i)->getType());
+            projectTypeNames.add (types.getUnchecked (i)->getDescription());
+            projectTypeCodes.add (types.getUnchecked (i)->getType());
         }
 
         props.add (new ChoicePropertyComponent (projectTypeValue, "Project Type", projectTypeNames, projectTypeCodes),
@@ -1696,7 +1691,7 @@ Project::Item Project::Item::findItemWithID (const String& targetId) const
     {
         for (auto i = getNumChildren(); --i >= 0;)
         {
-            auto found = getChild(i).findItemWithID (targetId);
+            auto found = getChild (i).findItemWithID (targetId);
 
             if (found.isValid())
                 return found;
@@ -1817,7 +1812,7 @@ Project::Item Project::Item::findItemForFile (const File& file) const
     {
         for (auto i = getNumChildren(); --i >= 0;)
         {
-            auto found = getChild(i).findItemForFile (file);
+            auto found = getChild (i).findItemForFile (file);
 
             if (found.isValid())
                 return found;
@@ -1834,7 +1829,7 @@ File Project::Item::determineGroupFolder() const
 
     for (int i = 0; i < getNumChildren(); ++i)
     {
-        f = getChild(i).getFile();
+        f = getChild (i).getFile();
 
         if (f.exists())
             return f.getParentDirectory();
@@ -1871,7 +1866,7 @@ void Project::Item::initialiseMissingProperties()
     else if (isGroup())
     {
         for (auto i = getNumChildren(); --i >= 0;)
-            getChild(i).initialiseMissingProperties();
+            getChild (i).initialiseMissingProperties();
     }
 }
 
@@ -1958,7 +1953,7 @@ void Project::Item::sortAlphabetically (bool keepGroupsAtStart, bool recursive)
 
     if (recursive)
         for (auto i = getNumChildren(); --i >= 0;)
-            getChild(i).sortAlphabetically (keepGroupsAtStart, true);
+            getChild (i).sortAlphabetically (keepGroupsAtStart, true);
 }
 
 Project::Item Project::Item::getOrCreateSubGroup (const String& name)
@@ -2324,7 +2319,8 @@ int Project::getARAContentTypes() const noexcept
 {
     int res = 0;
 
-    if (auto* arr = pluginARAAnalyzableContentValue.get().getArray())
+    if (const auto analyzableContent = pluginARAAnalyzableContentValue.get();
+        auto* arr = analyzableContent.getArray())
     {
         for (auto c : *arr)
             res |= (int) c;
@@ -2337,7 +2333,8 @@ int Project::getARATransformationFlags() const noexcept
 {
     int res = 0;
 
-    if (auto* arr = pluginARATransformFlagsValue.get().getArray())
+    if (const auto transformFlags = pluginARATransformFlagsValue.get();
+        auto* arr = transformFlags.getArray())
     {
         for (auto c : *arr)
             res |= (int) c;
@@ -2829,9 +2826,9 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_VSTNumMidiOutputs",           getVSTNumMIDIOutputsString());
     flags.set ("JucePlugin_ARAContentTypes",             String (getARAContentTypes()));
     flags.set ("JucePlugin_ARATransformationFlags",      String (getARATransformationFlags()));
-    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral(getARAFactoryIDString()));
-    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral(getARADocumentArchiveIDString()));
-    flags.set ("JucePlugin_ARACompatibleArchiveIDs",     toStringLiteral(getARACompatibleArchiveIDStrings()));
+    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral (getARAFactoryIDString()));
+    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral (getARADocumentArchiveIDString()));
+    flags.set ("JucePlugin_ARACompatibleArchiveIDs",     toStringLiteral (getARACompatibleArchiveIDStrings()));
 
     {
         String plugInChannelConfig = getPluginChannelConfigsString();

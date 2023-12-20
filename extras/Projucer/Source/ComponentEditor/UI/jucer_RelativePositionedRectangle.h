@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -220,8 +213,8 @@ public:
 
     /** Same functionality as updateFrom(), but taking doubles instead of ints.
     */
-    void updateFromDouble (const double newX, const double newY,
-                           const double newW, const double newH,
+    void updateFromDouble (double newX, double newY,
+                           double newW, double newH,
                            const Rectangle<int>& target) noexcept
     {
         updatePosAndSize (x, w, newX, newW, xMode, wMode, target.getX(), target.getWidth());
@@ -334,7 +327,7 @@ public:
     /** Sets the raw value of the x coordinate.
         See getX() for the meaning of this value.
     */
-    void setX (const double newX) noexcept          { x = newX; }
+    void setX (double newX) noexcept                { x = newX; }
 
     /** Returns the anchoring mode for the y coordinate.
         To change any of the modes, use setModes().
@@ -364,7 +357,7 @@ public:
     /** Sets the raw value of the y coordinate.
         See getY() for the meaning of this value.
     */
-    void setY (const double newY) noexcept          { y = newY; }
+    void setY (double newY) noexcept          { y = newY; }
 
     /** Returns the mode used to calculate the width.
         To change any of the modes, use setModes().
@@ -383,7 +376,7 @@ public:
 
         See getWidth() for the details about what this value means.
     */
-    void setWidth (const double newWidth) noexcept  { w = newWidth; }
+    void setWidth (double newWidth) noexcept        { w = newWidth; }
 
     /** Returns the mode used to calculate the height.
         To change any of the modes, use setModes().
@@ -402,7 +395,7 @@ public:
 
         See getHeight() for the details about what this value means.
     */
-    void setHeight (const double newHeight) noexcept    { h = newHeight; }
+    void setHeight (double newHeight) noexcept      { h = newHeight; }
 
     //==============================================================================
     /** If the size and position are constance, and wouldn't be affected by changes

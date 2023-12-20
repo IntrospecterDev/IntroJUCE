@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -23,9 +16,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 struct FFT::Instance
@@ -79,7 +70,7 @@ struct FFT::EngineImpl  : public FFT::Engine
 
 //==============================================================================
 //==============================================================================
-struct FFTFallback  : public FFT::Instance
+struct FFTFallback final : public FFT::Instance
 {
     // this should have the least priority of all engines
     static constexpr int priority = -1;
@@ -105,7 +96,7 @@ struct FFTFallback  : public FFT::Instance
             return;
         }
 
-        const SpinLock::ScopedLockType sl(processLock);
+        const SpinLock::ScopedLockType sl (processLock);
 
         jassert (configForward != nullptr);
 
@@ -232,7 +223,7 @@ struct FFTFallback  : public FFT::Instance
                 for (int i = fftSize / 2; i < fftSize; ++i)
                 {
                     auto index = fftSize / 2 - (i - fftSize / 2);
-                    twiddleTable[i] = conj(twiddleTable[index]);
+                    twiddleTable[i] = conj (twiddleTable[index]);
                 }
             }
 
@@ -434,7 +425,7 @@ FFT::EngineImpl<FFTFallback> fftFallback;
 //==============================================================================
 //==============================================================================
 #if (JUCE_MAC || JUCE_IOS) && JUCE_USE_VDSP_FRAMEWORK
-struct AppleFFT  : public FFT::Instance
+struct AppleFFT final : public FFT::Instance
 {
     static constexpr int priority = 5;
 
@@ -733,7 +724,7 @@ FFT::EngineImpl<FFTWImpl> fftwEngine;
 //==============================================================================
 //==============================================================================
 #if JUCE_DSP_USE_INTEL_MKL
-struct IntelFFT  : public FFT::Instance
+struct IntelFFT final : public FFT::Instance
 {
     static constexpr int priority = 8;
 
@@ -819,7 +810,7 @@ FFT::EngineImpl<IntelFFT> fftwEngine;
 // setting at 'Project' > 'Properties' > 'Configuration Properties' > 'Intel
 // Performance Libraries' > 'Use Intel(R) IPP'
 #if _IPP_SEQUENTIAL_STATIC || _IPP_SEQUENTIAL_DYNAMIC || _IPP_PARALLEL_STATIC || _IPP_PARALLEL_DYNAMIC
-class IntelPerformancePrimitivesFFT : public FFT::Instance
+class IntelPerformancePrimitivesFFT final : public FFT::Instance
 {
 public:
     static constexpr auto priority = 9;
@@ -997,5 +988,4 @@ void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData, bool ign
     zeromem (inputOutputData + limit, static_cast<size_t> (size * 2 - limit) * sizeof (float));
 }
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

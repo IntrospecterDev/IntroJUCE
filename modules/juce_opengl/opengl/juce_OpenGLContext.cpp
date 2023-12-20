@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -41,7 +34,7 @@ extern Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 
 // On iOS, all GL calls will crash when the app is running in the background, so
 // this prevents them from happening (which some messy locking behaviour)
-struct iOSBackgroundProcessCheck  : public AppInactivityCallback
+struct iOSBackgroundProcessCheck final : public AppInactivityCallback
 {
     iOSBackgroundProcessCheck()              { isBackgroundProcess(); appBecomingInactiveCallbacks.add (this); }
     ~iOSBackgroundProcessCheck() override    { appBecomingInactiveCallbacks.removeAllInstancesOf (this); }
@@ -92,7 +85,7 @@ static bool contextHasTextureNpotFeature()
 }
 
 //==============================================================================
-class OpenGLContext::CachedImage  : public CachedComponentImage
+class OpenGLContext::CachedImage final : public CachedComponentImage
 {
     template <typename T, typename U>
     static constexpr bool isFlagSet (const T& t, const U& u) { return (t & u) != 0; }
@@ -459,17 +452,17 @@ public:
             const auto localBounds = component.getLocalBounds();
             const auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * displayScale;
 
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            // Some hosts (Pro Tools 2022.7) do not take the current DPI into account when sizing
-            // plugin editor windows. Instead of querying the OS for the DPI of the editor window,
-            // we approximate based on the physical size of the window that was actually provided
-            // for the context to draw into. This may break if the OpenGL context's component is
-            // scaled differently in its width and height - but in this case, a single scale factor
-            // isn't that helpful anyway.
-            const auto newScale = (float) newArea.getWidth() / (float) localBounds.getWidth();
-           #else
-            const auto newScale = (float) displayScale;
-           #endif
+            const auto newScale = [&]
+            {
+               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                // Some hosts (Pro Tools 2022.7) do not take the window scaling into account when sizing
+                // plugin editor windows. The displayScale however seems to be correctly reported even in
+                // such cases.
+                return (float) displayScale * Desktop::getInstance().getGlobalScaleFactor();
+               #else
+                return (float) displayScale;
+               #endif
+            }();
 
             areaAndScale.set ({ newArea, newScale }, [&]
             {
@@ -634,7 +627,7 @@ public:
                 // The advantage of this callback is that it will catch *all* errors, even if we
                 // forget to check manually.
                 DBG ("OpenGL DBG message: " << message);
-                jassertquiet (type != GL_DEBUG_TYPE_ERROR && severity != GL_DEBUG_SEVERITY_HIGH);
+                jassert (type != GL_DEBUG_TYPE_ERROR && severity != GL_DEBUG_SEVERITY_HIGH);
             }, nullptr);
         }
        #endif
@@ -659,7 +652,7 @@ public:
     }
 
     //==============================================================================
-    struct BlockingWorker  : public OpenGLContext::AsyncWorker
+    struct BlockingWorker final : public OpenGLContext::AsyncWorker
     {
         BlockingWorker (OpenGLContext::AsyncWorker::Ptr && workerToUse)
             : originalWorker (std::move (workerToUse))
@@ -899,7 +892,7 @@ public:
     }
 
     //==============================================================================
-    class BufferSwapper : private AsyncUpdater
+    class BufferSwapper final : private AsyncUpdater
     {
     public:
         explicit BufferSwapper (CachedImage& img)
@@ -1061,8 +1054,8 @@ public:
 };
 
 //==============================================================================
-class OpenGLContext::Attachment  : public ComponentMovementWatcher,
-                                   private Timer
+class OpenGLContext::Attachment final : public ComponentMovementWatcher,
+                                        private Timer
 {
 public:
     Attachment (OpenGLContext& c, Component& comp)
@@ -1520,9 +1513,9 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
     {
         OpenGLRendering::SavedBinding<OpenGLRendering::TraitsVAO> vaoBinding;
 
-        struct OverlayShaderProgram  : public ReferenceCountedObject
+        struct OverlayShaderProgram final : public ReferenceCountedObject
         {
-            OverlayShaderProgram (OpenGLContext& context)
+            explicit OverlayShaderProgram (OpenGLContext& context)
                 : program (context), params (program)
             {}
 
@@ -1541,7 +1534,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                 return *program;
             }
 
-            struct BuiltProgram : public OpenGLShaderProgram
+            struct BuiltProgram final : public OpenGLShaderProgram
             {
                 explicit BuiltProgram (OpenGLContext& ctx)
                     : OpenGLShaderProgram (ctx)
@@ -1574,7 +1567,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
             struct Params
             {
-                Params (OpenGLShaderProgram& prog)
+                explicit Params (OpenGLShaderProgram& prog)
                     : positionAttribute (prog, "position"),
                       screenSize (prog, "screenSize"),
                       imageTexture (prog, "imageTexture"),
@@ -1606,6 +1599,11 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         auto right  = (GLshort) targetClipArea.getRight();
         auto bottom = (GLshort) targetClipArea.getBottom();
         const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
+
+        GLint oldProgram{};
+        glGetIntegerv (GL_CURRENT_PROGRAM, &oldProgram);
+
+        const ScopeGuard bindPreviousProgram { [&] { extensions.glUseProgram ((GLuint) oldProgram); } };
 
         auto& program = OverlayShaderProgram::select (*this);
         program.params.set ((float) contextWidth, (float) contextHeight, anchorPosAndTextureSize.toFloat(), flippedVertically);

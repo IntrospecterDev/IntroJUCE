@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -66,8 +66,8 @@ enum KeyPressCommandIDs
     This is a simple target for the key-presses which will live inside the demo component
     and contains a button that can be moved around with the arrow keys.
 */
-class KeyPressTarget : public Component,
-                       public ApplicationCommandTarget
+class KeyPressTarget final : public Component,
+                             public ApplicationCommandTarget
 {
 public:
     KeyPressTarget()
@@ -213,7 +213,7 @@ private:
 };
 
 //==============================================================================
-class KeyMappingsDemo   : public Component
+class KeyMappingsDemo final : public Component
 {
 public:
     KeyMappingsDemo()

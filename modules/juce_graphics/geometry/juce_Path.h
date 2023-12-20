@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -575,9 +568,9 @@ public:
     */
     void addBubble (Rectangle<float> bodyArea,
                     Rectangle<float> maximumArea,
-                    const Point<float> arrowTipPosition,
-                    const float cornerSize,
-                    const float arrowBaseWidth);
+                    Point<float> arrowTipPosition,
+                    float cornerSize,
+                    float arrowBaseWidth);
 
     /** Adds another path to this one.
 
@@ -798,6 +791,13 @@ public:
     */
     void restoreFromString (StringRef stringVersion);
 
+    uint64 getUniqueID() const noexcept { return uniqueID; }
+    auto getModificationCount() const noexcept { return modificationCount; }
+
+    mutable StatisticsAccumulator<double> geometryCreationTime;
+    mutable StatisticsAccumulator<double> filledGeometryRealizationCreationTime;
+    mutable StatisticsAccumulator<double> strokedGeometryRealizationCreationTime;
+
 private:
     //==============================================================================
     friend class PathFlatteningIterator;
@@ -826,6 +826,9 @@ private:
 
     PathBounds bounds;
     bool useNonZeroWinding = true;
+
+    int modificationCount = 0;
+    uint64 const uniqueID = (uint64) Time::getHighResolutionTicks() ^ reinterpret_cast<size_t> (this);
 
     static constexpr float lineMarker           = 100001.0f;
     static constexpr float moveMarker           = 100002.0f;

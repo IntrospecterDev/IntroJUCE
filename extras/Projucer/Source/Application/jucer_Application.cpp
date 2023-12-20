@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -29,7 +22,7 @@ void registerGUIEditorCommands();
 
 
 //==============================================================================
-struct ProjucerApplication::MainMenuModel  : public MenuBarModel
+struct ProjucerApplication::MainMenuModel final : public MenuBarModel
 {
     MainMenuModel()
     {
@@ -199,7 +192,7 @@ void ProjucerApplication::shutdown()
     deleteLogger();
 }
 
-struct AsyncQuitRetrier  : private Timer
+struct AsyncQuitRetrier final : private Timer
 {
     AsyncQuitRetrier()   { startTimer (500); }
 
@@ -501,7 +494,7 @@ PopupMenu ProjucerApplication::createDocumentMenu()
 
     for (int i = 0; i < numDocs; ++i)
     {
-        OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument(i);
+        OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument (i);
         menu.addItem (activeDocumentsBaseID + i, doc->getName());
     }
 
@@ -1156,7 +1149,7 @@ void ProjucerApplication::saveAllDocuments()
     openDocumentManager.saveAllSyncWithoutAsking();
 
     for (int i = 0; i < mainWindowList.windows.size(); ++i)
-        if (auto* pcc = mainWindowList.windows.getUnchecked(i)->getProjectContentComponent())
+        if (auto* pcc = mainWindowList.windows.getUnchecked (i)->getProjectContentComponent())
             pcc->refreshProjectTreeFileStatuses();
 }
 
@@ -1352,7 +1345,7 @@ void ProjucerApplication::deleteLogger()
                 files.addUsingDefaultSort (f);
 
             for (int i = 0; i < files.size() - maxNumLogFilesToKeep; ++i)
-                files.getReference(i).file.deleteFile();
+                files.getReference (i).file.deleteFile();
         }
     }
 

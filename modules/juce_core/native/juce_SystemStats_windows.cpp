@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -244,7 +240,7 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 #if JUCE_MINGW
  static uint64 getWindowsVersion()
  {
-     auto filename = _T("kernel32.dll");
+     auto filename = _T ("kernel32.dll");
      DWORD handle = 0;
 
      if (auto size = GetFileVersionInfoSize (filename, &handle))
@@ -256,7 +252,7 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
              VS_FIXEDFILEINFO* info = nullptr;
              UINT verSize = 0;
 
-             if (VerQueryValue (data, (LPCTSTR) _T("\\"), (void**) &info, &verSize))
+             if (VerQueryValue (data, (LPCTSTR) _T ("\\"), (void**) &info, &verSize))
                  if (size > 0 && info != nullptr && info->dwSignature == 0xfeef04bd)
                      return ((uint64) info->dwFileVersionMS << 32) | (uint64) info->dwFileVersionLS;
          }
@@ -319,44 +315,19 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 
 String SystemStats::getOperatingSystemName()
 {
-    const char* name = "Unknown OS";
+    const auto type = getOperatingSystemType();
 
-    switch (getOperatingSystemType())
-    {
-        case Windows11:         name = "Windows 11";        break;
-        case Windows10:         name = "Windows 10";        break;
-        case Windows8_1:        name = "Windows 8.1";       break;
-        case Windows8_0:        name = "Windows 8.0";       break;
-        case Windows7:          name = "Windows 7";         break;
-        case WinVista:          name = "Windows Vista";     break;
-        case WinXP:             name = "Windows XP";        break;
-        case Win2000:           name = "Windows 2000";      break;
+    if (type == Windows11)      return "Windows 11";
+    if (type == Windows10)      return "Windows 10";
+    if (type == Windows8_1)     return "Windows 8.1";
+    if (type == Windows8_0)     return "Windows 8.0";
+    if (type == Windows7)       return "Windows 7";
+    if (type == WinVista)       return "Windows Vista";
+    if (type == WinXP)          return "Windows XP";
+    if (type == Win2000)        return "Windows 2000";
 
-        case MacOSX:            JUCE_FALLTHROUGH
-        case Windows:           JUCE_FALLTHROUGH
-        case Linux:             JUCE_FALLTHROUGH
-        case Android:           JUCE_FALLTHROUGH
-        case iOS:               JUCE_FALLTHROUGH
-
-        case MacOSX_10_7:       JUCE_FALLTHROUGH
-        case MacOSX_10_8:       JUCE_FALLTHROUGH
-        case MacOSX_10_9:       JUCE_FALLTHROUGH
-        case MacOSX_10_10:      JUCE_FALLTHROUGH
-        case MacOSX_10_11:      JUCE_FALLTHROUGH
-        case MacOSX_10_12:      JUCE_FALLTHROUGH
-        case MacOSX_10_13:      JUCE_FALLTHROUGH
-        case MacOSX_10_14:      JUCE_FALLTHROUGH
-        case MacOSX_10_15:      JUCE_FALLTHROUGH
-        case MacOS_11:          JUCE_FALLTHROUGH
-        case MacOS_12:          JUCE_FALLTHROUGH
-        case MacOS_13:          JUCE_FALLTHROUGH
-
-        case UnknownOS:         JUCE_FALLTHROUGH
-        case WASM:              JUCE_FALLTHROUGH
-        default:                jassertfalse; break; // !! new type of OS?
-    }
-
-    return name;
+    jassertfalse;
+    return "Unknown OS";
 }
 
 String SystemStats::getDeviceDescription()

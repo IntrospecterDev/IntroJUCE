@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -46,8 +39,8 @@ typedef ComponentPeer* (*createUnityPeerFunctionType) (Component&);
 extern createUnityPeerFunctionType juce_createUnityPeerFn;
 
 //==============================================================================
-class UnityPeer    : public ComponentPeer,
-                     public AsyncUpdater
+class UnityPeer final : public ComponentPeer,
+                        public AsyncUpdater
 {
 public:
     UnityPeer (Component& ed)
@@ -141,7 +134,7 @@ public:
 
 private:
     //==============================================================================
-    struct UnityBitmapImage    : public ImagePixelData
+    struct UnityBitmapImage final : public ImagePixelData
     {
         UnityBitmapImage (uint8* data, int w, int h)
             : ImagePixelData (Image::PixelFormat::ARGB, w, h),
@@ -187,7 +180,7 @@ private:
     };
 
     //==============================================================================
-    struct MouseWatcher    : public Timer
+    struct MouseWatcher final : public Timer
     {
         MouseWatcher (ComponentPeer& o)    : owner (o)    {}
 
@@ -327,9 +320,9 @@ public:
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
-        const int numConfigs = sizeof (configs) / sizeof (short[2]);
+        [[maybe_unused]] const int numConfigs = sizeof (configs) / sizeof (short[2]);
 
-        jassertquiet (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
+        jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
 
         pluginInstance->setPlayConfigDetails (configs[0][0], configs[0][1], state->sampleRate, samplesPerBlock);
        #else

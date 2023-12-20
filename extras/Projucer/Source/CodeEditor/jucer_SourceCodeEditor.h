@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -28,7 +21,7 @@
 #include "jucer_DocumentEditorComponent.h"
 
 //==============================================================================
-class SourceCodeDocument  : public OpenDocumentManager::Document
+class SourceCodeDocument : public OpenDocumentManager::Document
 {
 public:
     SourceCodeDocument (Project*, const File&);
@@ -93,7 +86,7 @@ public:
     CodeDocument& getCodeDocument();
 
     //==============================================================================
-    struct Type  : public OpenDocumentManager::DocumentType
+    struct Type final : public OpenDocumentManager::DocumentType
     {
         bool canOpenFile (const File& file) override
         {
@@ -141,9 +134,9 @@ private:
 class GenericCodeEditorComponent;
 
 //==============================================================================
-class SourceCodeEditor  : public DocumentEditorComponent,
-                          private ValueTree::Listener,
-                          private CodeDocument::Listener
+class SourceCodeEditor final : public DocumentEditorComponent,
+                               private ValueTree::Listener,
+                               private CodeDocument::Listener
 {
 public:
     SourceCodeEditor (OpenDocumentManager::Document*, CodeDocument&);
@@ -178,7 +171,7 @@ private:
 
 
 //==============================================================================
-class GenericCodeEditorComponent  : public CodeEditorComponent
+class GenericCodeEditorComponent : public CodeEditorComponent
 {
 public:
     GenericCodeEditorComponent (const File&, CodeDocument&, CodeTokeniser*);
@@ -224,7 +217,7 @@ private:
 };
 
 //==============================================================================
-class CppCodeEditorComponent  : public GenericCodeEditorComponent
+class CppCodeEditorComponent final : public GenericCodeEditorComponent
 {
 public:
     CppCodeEditorComponent (const File&, CodeDocument&);

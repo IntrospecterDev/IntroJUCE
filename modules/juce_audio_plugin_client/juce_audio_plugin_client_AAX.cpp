@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -115,9 +108,9 @@ namespace AAXClasses
         return result;
     }
 
-    static void check (AAX_Result result)
+    static void check ([[maybe_unused]] AAX_Result result)
     {
-        jassertquiet (result == AAX_SUCCESS);
+        jassert (result == AAX_SUCCESS);
     }
 
     // maps a channel index of an AAX format to an index of a juce format
@@ -547,8 +540,8 @@ namespace AAXClasses
     //==============================================================================
     class JuceAAX_Processor;
 
-    class JuceAAX_GUI   : public AAX_CEffectGUI,
-                          public ModifierKeyProvider
+    class JuceAAX_GUI final : public AAX_CEffectGUI,
+                              public ModifierKeyProvider
     {
     public:
         JuceAAX_GUI() = default;
@@ -668,7 +661,7 @@ namespace AAXClasses
         }
 
         //==============================================================================
-        struct ContentWrapperComponent  : public Component
+        struct ContentWrapperComponent final : public Component
         {
             ContentWrapperComponent (JuceAAX_GUI& gui, AudioProcessor& plugin)
                 : owner (gui)
@@ -805,10 +798,10 @@ namespace AAXClasses
     static Array<JuceAAX_Processor*> activeProcessors;
 
     //==============================================================================
-    class JuceAAX_Processor   : public AAX_CEffectParameters,
-                                public juce::AudioPlayHead,
-                                public AudioProcessorListener,
-                                private AsyncUpdater
+    class JuceAAX_Processor final : public AAX_CEffectParameters,
+                                    public juce::AudioPlayHead,
+                                    public AudioProcessorListener,
+                                    private AsyncUpdater
     {
     public:
         JuceAAX_Processor()
@@ -1054,7 +1047,7 @@ namespace AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result GetParameterNumberofSteps (AAX_CParamID paramID, int32_t* result) const
+        AAX_Result GetParameterNumberOfSteps (AAX_CParamID paramID, int32_t* result) const override
         {
             if (auto* param = getParameterFromID (paramID))
                 *result = getSafeNumberOfParameterSteps (*param);
@@ -1257,7 +1250,7 @@ namespace AAXClasses
                 }());
             }
 
-            const auto offset = timeCodeIfAvailable.has_value() ? timeCodeIfAvailable->offset : int64_t{};
+            const auto offset = timeCodeIfAvailable.has_value() ? (double) timeCodeIfAvailable->offset : 0.0;
             const auto effectiveRate = info.getFrameRate().hasValue() ? info.getFrameRate()->getEffectiveRate() : 0.0;
             info.setEditOriginTime (makeOptional (effectiveRate != 0.0 ? offset / effectiveRate : offset));
 
@@ -1482,8 +1475,8 @@ namespace AAXClasses
                                                    AudioProcessor::BusesLayout& fullLayout)
         {
             auto currentLayout = getDefaultLayout (p, true);
-            bool success = p.checkBusesLayoutSupported (currentLayout);
-            jassertquiet (success);
+            [[maybe_unused]] bool success = p.checkBusesLayoutSupported (currentLayout);
+            jassert (success);
 
             auto numInputBuses  = p.getBusCount (true);
             auto numOutputBuses = p.getBusCount (false);
@@ -1759,18 +1752,16 @@ namespace AAXClasses
             if (! bypassPartOfRegularParams)
                 juceParameters.addNonOwning (bypassParameter);
 
-            int parameterIndex = 0;
-
-            for (auto* juceParam : juceParameters)
+            for (const auto [parameterIndex, juceParam] : enumerate (juceParameters))
             {
                 auto isBypassParameter = (juceParam == bypassParameter);
 
                 auto category = juceParam->getCategory();
                 auto paramID  = isBypassParameter ? String (cDefaultMasterBypassID)
-                                                  : juceParameters.getParamID (audioProcessor, parameterIndex);
+                                                  : juceParameters.getParamID (audioProcessor, (int) parameterIndex);
 
                 aaxParamIDs.add (paramID);
-                auto* aaxParamID = aaxParamIDs.getReference (parameterIndex++).toRawUTF8();
+                auto* aaxParamID = aaxParamIDs.getReference ((int) parameterIndex).toRawUTF8();
 
                 paramMap.set (AAXClasses::getAAXParamHash (aaxParamID), juceParam);
 
@@ -1816,7 +1807,7 @@ namespace AAXClasses
 
         bool getMainBusFormats (AudioChannelSet& inputSet, AudioChannelSet& outputSet)
         {
-            auto& audioProcessor = getPluginInstance();
+            [[maybe_unused]] auto& audioProcessor = getPluginInstance();
 
            #if JucePlugin_IsMidiEffect
             // MIDI effect plug-ins do not support any audio channels
@@ -2006,7 +1997,7 @@ namespace AAXClasses
 
                 i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels, sideChainBufferIdx,
                                                       *(i.bufferSize), *(i.bypass) != 0,
-                                                      getMidiNodeIn(i), getMidiNodeOut(i),
+                                                      getMidiNodeIn (i), getMidiNodeOut (i),
                                                       meterTapBuffers);
             }
         }
@@ -2419,8 +2410,8 @@ namespace AAXClasses
                                   Array<int32>& pluginIds,
                                   const int numMeters)
     {
-        auto aaxInputFormat  = getFormatForAudioChannelSet (fullLayout.getMainInputChannelSet(),  false);
-        auto aaxOutputFormat = getFormatForAudioChannelSet (fullLayout.getMainOutputChannelSet(), false);
+        [[maybe_unused]] auto aaxInputFormat  = getFormatForAudioChannelSet (fullLayout.getMainInputChannelSet(),  false);
+        [[maybe_unused]] auto aaxOutputFormat = getFormatForAudioChannelSet (fullLayout.getMainOutputChannelSet(), false);
 
        #if JucePlugin_IsSynth
         if (aaxInputFormat == AAX_eStemFormat_None)
@@ -2589,8 +2580,8 @@ namespace AAXClasses
     static void getPlugInDescription (AAX_IEffectDescriptor& descriptor, [[maybe_unused]] const AAX_IFeatureInfo* featureInfo)
     {
         auto plugin = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
-        auto numInputBuses  = plugin->getBusCount (true);
-        auto numOutputBuses = plugin->getBusCount (false);
+        [[maybe_unused]] auto numInputBuses  = plugin->getBusCount (true);
+        [[maybe_unused]] auto numOutputBuses = plugin->getBusCount (false);
 
         auto pluginNames = plugin->getAlternateDisplayNames();
 

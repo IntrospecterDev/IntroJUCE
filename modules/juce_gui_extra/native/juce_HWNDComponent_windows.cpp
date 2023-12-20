@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -58,6 +51,8 @@ public:
             ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { hwnd };
 
             SetWindowPos (hwnd, nullptr, area.getX(), area.getY(), area.getWidth(), area.getHeight(), flagsToSend);
+
+            invalidateHWNDAndChildren();
         }
     }
 
@@ -80,7 +75,7 @@ public:
         ShowWindow (hwnd, isShowing ? SW_SHOWNA : SW_HIDE);
 
         if (isShowing)
-            InvalidateRect (hwnd, nullptr, 0);
+            InvalidateRect (hwnd, nullptr, TRUE);
      }
 
     void componentVisibilityChanged() override
@@ -111,6 +106,17 @@ public:
         return {};
     }
 
+    void invalidateHWNDAndChildren()
+    {
+        EnumChildWindows (hwnd, invalidateHwndCallback, 0);
+    }
+
+    static BOOL WINAPI invalidateHwndCallback (HWND hwnd, LPARAM)
+    {
+        InvalidateRect (hwnd, nullptr, TRUE);
+        return TRUE;
+    }
+
     HWND hwnd;
 
 private:
@@ -118,14 +124,14 @@ private:
     {
         if (currentPeer != nullptr)
         {
-            auto windowFlags = GetWindowLongPtr (hwnd, -16);
+             auto windowFlags = GetWindowLongPtr (hwnd, GWL_STYLE);
 
             using FlagType = decltype (windowFlags);
 
             windowFlags &= ~(FlagType) WS_POPUP;
             windowFlags |= (FlagType) WS_CHILD;
 
-            SetWindowLongPtr (hwnd, -16, windowFlags);
+            SetWindowLongPtr (hwnd, GWL_STYLE, windowFlags);
             SetParent (hwnd, (HWND) currentPeer->getNativeHandle());
 
             componentMovedOrResized (true, true);
@@ -136,6 +142,16 @@ private:
     {
         ShowWindow (hwnd, SW_HIDE);
         SetParent (hwnd, nullptr);
+    }
+
+    static String printHwnd (void* hwnd)
+    {
+        return printHwnd ((HWND) hwnd);
+    }
+
+    static String printHwnd (HWND hwnd)
+    {
+        return String::toHexString ((pointer_sized_int) hwnd);
     }
 
     Component& owner;

@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -27,11 +20,11 @@
 
 
 //==============================================================================
-class MakefileProjectExporter  : public ProjectExporter
+class MakefileProjectExporter final : public ProjectExporter
 {
 protected:
     //==============================================================================
-    class MakeBuildConfiguration  : public BuildConfiguration
+    class MakeBuildConfiguration final : public BuildConfiguration
     {
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -125,10 +118,10 @@ protected:
 
 public:
     //==============================================================================
-    class MakefileTarget : public build_tools::ProjectType::Target
+    class MakefileTarget final : public build_tools::ProjectType::Target
     {
     public:
-        MakefileTarget (build_tools::ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
+        MakefileTarget (Type targetType, const MakefileProjectExporter& exporter)
             : Target (targetType), owner (exporter)
         {}
 
@@ -163,7 +156,7 @@ public:
         StringPairArray getDefines (const BuildConfiguration& config) const
         {
             StringPairArray result;
-            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified).getAllKeys();
+            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, unspecified).getAllKeys();
             auto targetSpecific = owner.getAllPreprocessorDefs (config, type);
 
             for (auto& key : targetSpecific.getAllKeys())
@@ -299,10 +292,10 @@ public:
 
             for (auto& [path, flags] : filesToCompile)
             {
-                const auto additionalTargetDependencies = [&path = path, this]
+                const auto additionalTargetDependencies = [&p = path, this]
                 {
                     if (   owner.linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper()
-                        && path.getFileName().contains ("include_juce_gui_extra.cpp"))
+                        && p.getFileName().contains ("include_juce_gui_extra.cpp"))
                     {
                         return owner.linuxSubprocessHelperProperties
                             .getLinuxSubprocessHelperBinaryDataSource()
@@ -358,6 +351,8 @@ public:
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER)";
             else if (type == VST3PlugIn)
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER)";
+            else if (type == VST3Helper)
+                out << " $(JUCE_OBJDIR)/cxxfs.cmd";
 
             out << newLine;
 
@@ -398,6 +393,9 @@ public:
                     out << "$(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE) ";
 
                 out << "$(JUCE_LDFLAGS) $(shell cat $(JUCE_OBJDIR)/execinfo.cmd) ";
+
+                if (type == VST3Helper)
+                    out << "$(shell cat $(JUCE_OBJDIR)/cxxfs.cmd) ";
 
                 if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle
                         || type == GUIApp || type == StandalonePlugIn)
@@ -826,47 +824,51 @@ private:
         out << " $(LDFLAGS)" << newLine;
     }
 
+    void writeLinesForAggregateTarget (OutputStream& out) const
+    {
+        const auto isPartOfAggregate = [&] (const MakefileTarget* x)
+        {
+            return x != nullptr
+                   && x->type != build_tools::ProjectType::Target::AggregateTarget
+                   && x->type != build_tools::ProjectType::Target::SharedCodeTarget;
+        };
+
+        std::vector<MakefileTarget*> dependencies;
+        std::copy_if (targets.begin(), targets.end(), std::back_inserter (dependencies), isPartOfAggregate);
+
+        out << "all :";
+
+        for (const auto& d : dependencies)
+            out << ' ' << d->getPhonyName();
+
+        out << newLine << newLine;
+
+        for (const auto& d : dependencies)
+            out << d->getPhonyName() << " : " << d->getBuildProduct() << newLine;
+
+        out << newLine << newLine;
+    }
+
+    void writeLinesForTarget (OutputStream& out, const StringArray& packages, MakefileTarget& target) const
+    {
+        if (target.type == build_tools::ProjectType::Target::AggregateTarget)
+        {
+            writeLinesForAggregateTarget (out);
+        }
+        else
+        {
+            if (! getProject().isAudioPluginProject())
+                out << "all : " << target.getBuildProduct() << newLine << newLine;
+
+            target.writeTargetLine (out, packages);
+        }
+    }
+
     void writeTargetLines (OutputStream& out, const StringArray& packages) const
     {
-        auto n = targets.size();
-
-        for (int i = 0; i < n; ++i)
-        {
-            if (auto* target = targets.getUnchecked (i))
-            {
-                if (target->type == build_tools::ProjectType::Target::AggregateTarget)
-                {
-                    StringArray dependencies;
-                    MemoryOutputStream subTargetLines;
-
-                    for (int j = 0; j < n; ++j)
-                    {
-                        if (i == j) continue;
-
-                        if (auto* dependency = targets.getUnchecked (j))
-                        {
-                            if (dependency->type != build_tools::ProjectType::Target::SharedCodeTarget)
-                            {
-                                auto phonyName = dependency->getPhonyName();
-
-                                subTargetLines << phonyName << " : " << dependency->getBuildProduct() << newLine;
-                                dependencies.add (phonyName);
-                            }
-                        }
-                    }
-
-                    out << "all : " << dependencies.joinIntoString (" ") << newLine << newLine;
-                    out << subTargetLines.toString()                     << newLine << newLine;
-                }
-                else
-                {
-                    if (! getProject().isAudioPluginProject())
-                        out << "all : " << target->getBuildProduct() << newLine << newLine;
-
-                    target->writeTargetLine (out, packages);
-                }
-            }
-        }
+        for (const auto& target : targets)
+            if (target != nullptr)
+                writeLinesForTarget (out, packages, *target);
     }
 
     void writeConfig (OutputStream& out, const MakeBuildConfiguration& config) const
@@ -940,7 +942,18 @@ private:
             return "";
         }();
 
-        out << "  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)" << preBuildDirectory << newLine
+        const auto targetsToClean = [&]
+        {
+            StringArray result;
+
+            for (const auto& target : targets)
+                if (target->type != build_tools::ProjectType::Target::AggregateTarget)
+                    result.add (target->getBuildProduct());
+
+            return result;
+        }();
+
+        out << "  CLEANCMD = rm -rf " << targetsToClean.joinIntoString (" ") << " $(JUCE_OBJDIR)" << preBuildDirectory << newLine
             << "endif" << newLine
             << newLine;
     }
@@ -1224,6 +1237,13 @@ private:
             << "\t$(V_AT)printf \"int main() { return 0; }\" | $(CXX) -x c++ -o $(@D)/execinfo.x -lexecinfo - >/dev/null 2>&1 && printf -- \"-lexecinfo\" > \"$@\" || touch \"$@\"" << newLine
             << newLine;
 
+        // stdc++fs is only needed for some compilers
+        out << "$(JUCE_OBJDIR)/cxxfs.cmd:" << newLine
+            << "\t-$(V_AT)mkdir -p $(@D)" << newLine
+            << "\t-@if [ -z \"$(V_AT)\" ]; then echo \"Checking if we need to link stdc++fs\"; fi" << newLine
+            << "\t$(V_AT)printf \"int main() { return 0; }\" | $(CXX) -x c++ -o $(@D)/cxxfs.x -lstdc++fs - >/dev/null 2>&1 && printf -- \"-lstdc++fs\" > \"$@\" || touch \"$@\"" << newLine
+            << newLine;
+
         if (linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper())
             writeSubprocessHelperTargets (out);
 
@@ -1232,10 +1252,19 @@ private:
             << "\t$(V_AT)$(CLEANCMD)"             << newLine
             << newLine;
 
-        out << "strip:"                                                       << newLine
-            << "\t@echo Stripping " << projectName                            << newLine
-            << "\t-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)" << newLine
-            << newLine;
+        out << "strip:"                                                            << newLine
+            << "\t@echo Stripping " << projectName                                 << newLine;
+
+        for (const auto& target : targets)
+        {
+            if (target->type != build_tools::ProjectType::Target::AggregateTarget
+                && target->type != build_tools::ProjectType::Target::SharedCodeTarget)
+            {
+                out << "\t-$(V_AT)$(STRIP) --strip-unneeded " << target->getBuildProduct() << newLine;
+            }
+        }
+
+        out << newLine;
 
         writeIncludeLines (out);
     }
@@ -1257,6 +1286,7 @@ private:
     String getPhonyTargetLine() const
     {
         MemoryOutputStream phonyTargetLine;
+        phonyTargetLine.setNewLineString (getNewLineString());
 
         phonyTargetLine << ".PHONY: clean all strip";
 
@@ -1264,9 +1294,13 @@ private:
             return phonyTargetLine.toString();
 
         for (auto target : targets)
+        {
             if (target->type != build_tools::ProjectType::Target::SharedCodeTarget
                 && target->type != build_tools::ProjectType::Target::AggregateTarget)
+            {
                 phonyTargetLine << " " << target->getPhonyName();
+            }
+        }
 
         return phonyTargetLine.toString();
     }

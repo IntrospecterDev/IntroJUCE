@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -172,8 +172,8 @@ private:
     This component represents a horizontal vibrating musical string of fixed height
     and variable length. The string can be excited by calling stringPlucked().
 */
-class StringComponent   : public Component,
-                          private Timer
+class StringComponent final : public Component,
+                              private Timer
 {
 public:
     StringComponent (int lengthInPixels, Colour stringColour)
@@ -249,7 +249,7 @@ private:
 };
 
 //==============================================================================
-class PluckedStringsDemo   : public AudioAppComponent
+class PluckedStringsDemo final : public AudioAppComponent
 {
 public:
     PluckedStringsDemo()

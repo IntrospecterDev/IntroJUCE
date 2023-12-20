@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -108,7 +101,7 @@ static NSMutableURLRequest* getRequestForURL (const String& url, const StringArr
 
 #if JUCE_MAC
 template <class WebViewClass>
-struct WebViewKeyEquivalentResponder : public ObjCClass<WebViewClass>
+struct WebViewKeyEquivalentResponder final : public ObjCClass<WebViewClass>
 {
     WebViewKeyEquivalentResponder()
         : ObjCClass<WebViewClass> ("WebViewKeyEquivalentResponder_")
@@ -154,7 +147,7 @@ struct WebViewKeyEquivalentResponder : public ObjCClass<WebViewClass>
 };
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
+struct DownloadClickDetectorClass final : public ObjCClass<NSObject>
 {
     DownloadClickDetectorClass()  : ObjCClass ("JUCEWebClickDetector_")
     {
@@ -198,7 +191,7 @@ struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
         addMethod (@selector (webView:runOpenPanelForFileButtonWithResultListener:allowMultipleFiles:),
                    [] (id, SEL, WebView*, id<WebOpenPanelResultListener> resultListener, BOOL allowMultipleFiles)
                    {
-                       struct DeletedFileChooserWrapper : private DeletedAtShutdown
+                       struct DeletedFileChooserWrapper final : private DeletedAtShutdown
                        {
                            DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, id<WebOpenPanelResultListener> rl)
                                : chooser (std::move (fc)), listener (rl)
@@ -258,7 +251,7 @@ private:
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
-struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass  : public ObjCClass<NSObject>
+struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass final : public ObjCClass<NSObject>
 {
     WebViewDelegateClass()  : ObjCClass ("JUCEWebViewDelegate_")
     {
@@ -312,7 +305,7 @@ struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass  : public ObjCClass<NS
                        {
                            using CompletionHandlerType = decltype (completionHandler);
 
-                           class DeletedFileChooserWrapper   : private DeletedAtShutdown
+                           class DeletedFileChooserWrapper final : private DeletedAtShutdown
                            {
                            public:
                                DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, CompletionHandlerType h)
@@ -342,7 +335,7 @@ struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass  : public ObjCClass<NS
                                bool handlerCalled = false;
                            };
 
-                           auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
+                           auto chooser = std::make_unique<FileChooser> (TRANS ("Select the file you want to upload..."),
                                                                          File::getSpecialLocation (File::userHomeDirectory), "*");
                            auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), completionHandler);
 

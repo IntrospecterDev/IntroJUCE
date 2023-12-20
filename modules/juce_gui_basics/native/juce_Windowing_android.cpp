@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -904,7 +897,7 @@ const uint8 javaComponentPeerView[]
  void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
  void juce_firebaseRemoteNotificationReceived (void*);
  void juce_firebaseRemoteMessagesDeleted();
- void juce_firebaseRemoteMessageSent(void*);
+ void juce_firebaseRemoteMessageSent (void*);
  void juce_firebaseRemoteMessageSendError (void*, void*);
 #endif
 
@@ -1223,8 +1216,8 @@ static constexpr int translateAndroidKeyboardFlags (int javaFlags) noexcept
 }
 
 //==============================================================================
-class AndroidComponentPeer  : public ComponentPeer,
-                              private Timer
+class AndroidComponentPeer final : public ComponentPeer,
+                                   private Timer
 {
 public:
     AndroidComponentPeer (Component& comp, int windowStyleFlags, void* nativeViewHandle)
@@ -1915,7 +1908,7 @@ public:
     static int64 touchesDown;
 
     //==============================================================================
-    struct StartupActivityCallbackListener  : public ActivityLifecycleCallbacks
+    struct StartupActivityCallbackListener final : public ActivityLifecycleCallbacks
     {
         void onActivityStarted (jobject /*activity*/) override
         {
@@ -2074,7 +2067,7 @@ private:
     }
 
     //==============================================================================
-    class ViewWindowInsetsListener  : public juce::AndroidInterfaceImplementer
+    class ViewWindowInsetsListener final : public juce::AndroidInterfaceImplementer
     {
     public:
         jobject onApplyWindowInsets (LocalRef<jobject>, LocalRef<jobject> insets)
@@ -2115,7 +2108,7 @@ private:
     };
 
     //==============================================================================
-    struct PreallocatedImage  : public ImagePixelData
+    struct PreallocatedImage final : public ImagePixelData
     {
         PreallocatedImage (int width_, int height_, jint* data_, bool hasAlpha_)
             : ImagePixelData (Image::ARGB, width_, height_), data (data_), hasAlpha (hasAlpha_)
@@ -2458,7 +2451,7 @@ DECLARE_JNI_CLASS (AndroidDialogOnClickListener, "android/content/DialogInterfac
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
-class DialogListener  : public juce::AndroidInterfaceImplementer
+class DialogListener final : public juce::AndroidInterfaceImplementer
 {
 public:
     explicit DialogListener (std::function<void()> cb) : callback (std::move (cb)) {}
@@ -2568,7 +2561,7 @@ DECLARE_JNI_CLASS (AndroidDisplayMetrics, "android/util/DisplayMetrics")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
-class LayoutChangeListener  : public juce::AndroidInterfaceImplementer
+class LayoutChangeListener : public juce::AndroidInterfaceImplementer
 {
 public:
     virtual void onLayoutChange (LocalRef<jobject> view, int left, int top, int right, int bottom,
@@ -2607,7 +2600,7 @@ private:
 };
 
 //==============================================================================
-struct MainActivityWindowLayoutListener   : public LayoutChangeListener
+struct MainActivityWindowLayoutListener final : public LayoutChangeListener
 {
     MainActivityWindowLayoutListener (std::function<void()>&& updateDisplaysCb)
         : forceDisplayUpdate (std::move (updateDisplaysCb))
@@ -2776,7 +2769,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
     auto* env = getEnv();
 
     LocalRef<jobject> clipboardManager (env->CallObjectMethod (getAppContext().get(), AndroidContext.getSystemService, javaString ("clipboard").get()));
-    env->CallVoidMethod (clipboardManager.get(), AndroidClipboardManager.setText, javaString(text).get());
+    env->CallVoidMethod (clipboardManager.get(), AndroidClipboardManager.setText, javaString (text).get());
 }
 
 String SystemClipboard::getTextFromClipboard()
@@ -2789,7 +2782,7 @@ String SystemClipboard::getTextFromClipboard()
     if (charSequence == nullptr)
         return {};
 
-    return juceString(LocalRef<jstring> ((jstring) env->CallObjectMethod(charSequence.get(), JavaCharSequence.toString)));
+    return juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (charSequence.get(), JavaCharSequence.toString)));
 }
 
 //==============================================================================

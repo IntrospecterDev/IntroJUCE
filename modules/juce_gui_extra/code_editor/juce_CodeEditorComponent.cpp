@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -27,7 +20,7 @@ namespace juce
 {
 
 //==============================================================================
-class CodeEditorComponent::CodeEditorAccessibilityHandler  : public AccessibilityHandler
+class CodeEditorComponent::CodeEditorAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit CodeEditorAccessibilityHandler (CodeEditorComponent& codeEditorComponentToWrap)
@@ -40,7 +33,7 @@ public:
     }
 
 private:
-    class CodeEditorComponentTextInterface  : public AccessibilityTextInterface
+    class CodeEditorComponentTextInterface final : public AccessibilityTextInterface
     {
     public:
         explicit CodeEditorComponentTextInterface (CodeEditorComponent& codeEditorComponentToWrap)
@@ -384,7 +377,7 @@ private:
 };
 
 //==============================================================================
-class CodeEditorComponent::GutterComponent  : public Component
+class CodeEditorComponent::GutterComponent final : public Component
 {
 public:
     GutterComponent() {}
@@ -584,7 +577,7 @@ void CodeEditorComponent::paint (Graphics& g)
         RectangleList<float> highlightArea;
 
         for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-            if (const auto area = lines.getUnchecked(i)->getHighlightArea (x, lineHeight * i, lineHeight, charWidth))
+            if (const auto area = lines.getUnchecked (i)->getHighlightArea (x, lineHeight * i, lineHeight, charWidth))
                 highlightArea.add (*area);
 
         g.setColour (findColour (CodeEditorComponent::highlightColourId));
@@ -592,7 +585,7 @@ void CodeEditorComponent::paint (Graphics& g)
     }
 
     for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-        lines.getUnchecked(i)->draw (*this, g, font, rightClip, x, lineHeight * i, lineHeight, charWidth);
+        lines.getUnchecked (i)->draw (*this, g, font, rightClip, x, lineHeight * i, lineHeight, charWidth);
 }
 
 void CodeEditorComponent::setScrollbarThickness (const int thickness)
@@ -635,7 +628,7 @@ void CodeEditorComponent::rebuildLineTokens()
 
     for (int i = 0; i < numNeeded; ++i)
     {
-        if (lines.getUnchecked(i)->update (document, firstLineOnScreen + i, source, codeTokeniser,
+        if (lines.getUnchecked (i)->update (document, firstLineOnScreen + i, source, codeTokeniser,
                                            spacesPerTab, selectionStart, selectionEnd))
         {
             minLineToRepaint = jmin (minLineToRepaint, i);

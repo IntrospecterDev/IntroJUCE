@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -146,17 +139,9 @@ struct CameraDevice::Pimpl
        #if JUCE_USE_NEW_CAMERA_API
         if (@available (macOS 10.15, *))
         {
-            const auto deviceType = [&]
-            {
-               #if defined (MAC_OS_VERSION_14_0) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_VERSION_14_0
-                if (@available (macOS 14.0, *))
-                    return AVCaptureDeviceTypeExternal;
-               #endif
-
-                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations", "-Wunguarded-availability-new")
-                return AVCaptureDeviceTypeExternalUnknown;
-                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-            }();
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            const auto deviceType = AVCaptureDeviceTypeExternalUnknown;
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             auto* discovery = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes: @[AVCaptureDeviceTypeBuiltInWideAngleCamera, deviceType]
                                                                                      mediaType: AVMediaTypeVideo
@@ -531,8 +516,8 @@ private:
 
         MessageManager::callAsync ([weakRef = WeakReference<Pimpl> { this }, image]() mutable
         {
-            if (weakRef != nullptr && weakRef->pictureTakenCallback != nullptr)
-                weakRef->pictureTakenCallback (image);
+            if (weakRef != nullptr)
+                NullCheckedInvocation::invoke (weakRef->pictureTakenCallback, image);
         });
     }
 
@@ -559,8 +544,7 @@ private:
     {
         JUCE_CAMERA_LOG ("cameraSessionRuntimeError(), error = " + error);
 
-        if (owner.onErrorOccurred != nullptr)
-            owner.onErrorOccurred (error);
+        NullCheckedInvocation::invoke (owner.onErrorOccurred, error);
     }
 
     //==============================================================================

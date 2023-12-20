@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -379,7 +372,7 @@ private:
             {
                 NSError* error = nil;
 
-                int successCount = 0;
+                [[maybe_unused]] int successCount = 0;
 
                 for (NSString* key : assetKeys.get())
                 {
@@ -409,7 +402,7 @@ private:
                     }
                 }
 
-                jassertquiet (successCount == (int) [assetKeys.get() count]);
+                jassert (successCount == (int) [assetKeys.get() count]);
                 preparePlayerItem();
             }
 
@@ -592,7 +585,7 @@ private:
                     if (useNativeControls)
                         return std::make_unique<WrappedPlayerView>();
 
-                return std::make_unique<WrappedPlayerLayer> ();
+                return std::make_unique<WrappedPlayerLayer>();
             }();
         }
 
@@ -650,7 +643,7 @@ private:
         class WrappedPlayerLayer : public WrappedPlayer
         {
         public:
-            WrappedPlayerLayer ()                       { [view.get() setLayer: playerLayer.get()]; }
+            WrappedPlayerLayer()                        { [view.get() setLayer: playerLayer.get()]; }
             NSView* getView() const override            { return view.get(); }
             AVPlayer* getPlayer() const override        { return [playerLayer.get() player]; }
             void setPlayer (AVPlayer* player) override  { [playerLayer.get() setPlayer: player]; }
@@ -797,7 +790,7 @@ private:
 
     static double toSeconds (const CMTime& t) noexcept
     {
-        return t.timescale != 0 ? (t.value / (double) t.timescale) : 0.0;
+        return t.timescale != 0 ? ((double) t.value / (double) t.timescale) : 0.0;
     }
 
     void playerPreparationFinished (const URL& url, Result r)
@@ -810,20 +803,17 @@ private:
 
     void errorOccurred (const String& errorMessage)
     {
-        if (owner.onErrorOccurred != nullptr)
-            owner.onErrorOccurred (errorMessage);
+        NullCheckedInvocation::invoke (owner.onErrorOccurred, errorMessage);
     }
 
     void playbackStarted()
     {
-        if (owner.onPlaybackStarted != nullptr)
-            owner.onPlaybackStarted();
+        NullCheckedInvocation::invoke (owner.onPlaybackStarted);
     }
 
     void playbackStopped()
     {
-        if (owner.onPlaybackStopped != nullptr)
-            owner.onPlaybackStopped();
+        NullCheckedInvocation::invoke (owner.onPlaybackStopped);
     }
 
     void playbackReachedEndTime()

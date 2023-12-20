@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -29,8 +22,8 @@ namespace juce
 static const Identifier tableColumnProperty { "_tableColumnId" };
 static const Identifier tableAccessiblePlaceholderProperty { "_accessiblePlaceholder" };
 
-class TableListBox::RowComp   : public TooltipClient,
-                                public ComponentWithListRowMouseBehaviours<RowComp>
+class TableListBox::RowComp final : public TooltipClient,
+                                    public ComponentWithListRowMouseBehaviours<RowComp>
 {
 public:
     explicit RowComp (TableListBox& tlb)
@@ -224,7 +217,7 @@ public:
 
 private:
     //==============================================================================
-    class RowAccessibilityHandler  : public AccessibilityHandler
+    class RowAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         RowAccessibilityHandler (RowComp& rowComp)
@@ -266,7 +259,7 @@ private:
         }
 
     private:
-        class RowComponentCellInterface  : public AccessibilityCellInterface
+        class RowComponentCellInterface final : public AccessibilityCellInterface
         {
         public:
             RowComponentCellInterface (RowAccessibilityHandler& handler)
@@ -314,7 +307,7 @@ private:
 
 
 //==============================================================================
-class TableListBox::Header  : public TableHeaderComponent
+class TableListBox::Header final : public TableHeaderComponent
 {
 public:
     Header (TableListBox& tlb)  : owner (tlb) {}
@@ -323,8 +316,8 @@ public:
     {
         if (owner.isAutoSizeMenuOptionShown())
         {
-            menu.addItem (autoSizeColumnId, TRANS("Auto-size this column"), columnIdClicked != 0);
-            menu.addItem (autoSizeAllId, TRANS("Auto-size all columns"), owner.getHeader().getNumColumns (true) > 0);
+            menu.addItem (autoSizeColumnId, TRANS ("Auto-size this column"), columnIdClicked != 0);
+            menu.addItem (autoSizeAllId, TRANS ("Auto-size all columns"), owner.getHeader().getNumColumns (true) > 0);
             menu.addSeparator();
         }
 
@@ -569,7 +562,7 @@ Optional<AccessibilityTableInterface::Span> findRecursively (const Accessibility
 
 std::unique_ptr<AccessibilityHandler> TableListBox::createAccessibilityHandler()
 {
-    class TableInterface  : public AccessibilityTableInterface
+    class TableInterface final : public AccessibilityTableInterface
     {
     public:
         explicit TableInterface (TableListBox& tableListBoxToWrap)

@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -23,12 +16,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
-struct FFTUnitTest  : public UnitTest
+struct FFTUnitTest final : public UnitTest
 {
     FFTUnitTest()
         : UnitTest ("FFT", UnitTestCategories::dsp)
@@ -63,7 +54,7 @@ struct FFTUnitTest  : public UnitTest
                                                / static_cast<float> (n));
 
         for (size_t i = 0; i < n; ++i)
-            out[i] = freqConvolution (in, static_cast<float>(i) * base_freq, n);
+            out[i] = freqConvolution (in, static_cast<float> (i) * base_freq, n);
     }
 
     static void performReferenceFourier (const float* in, Complex<float>* out,
@@ -78,7 +69,7 @@ struct FFTUnitTest  : public UnitTest
                                                 / static_cast<float> (n));
 
         for (size_t i = 0; i < n; ++i)
-            out[i] = freqConvolution (buffer.getData(), static_cast<float>(i) * base_freq, n);
+            out[i] = freqConvolution (buffer.getData(), static_cast<float> (i) * base_freq, n);
     }
 
 
@@ -167,7 +158,7 @@ struct FFTUnitTest  : public UnitTest
 
     struct ComplexTest
     {
-        static void run(FFTUnitTest& u)
+        static void run (FFTUnitTest& u)
         {
             Random random (378272);
 
@@ -214,5 +205,4 @@ struct FFTUnitTest  : public UnitTest
 
 static FFTUnitTest fftUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

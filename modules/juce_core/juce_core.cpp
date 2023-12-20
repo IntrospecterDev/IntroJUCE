@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -146,6 +142,7 @@
 #include "misc/juce_Result.cpp"
 #include "misc/juce_Uuid.cpp"
 #include "misc/juce_ConsoleApplication.cpp"
+#include "misc/juce_ScopeGuard.cpp"
 #include "network/juce_MACAddress.cpp"
 #include "network/juce_NamedPipe.cpp"
 #include "network/juce_Socket.cpp"
@@ -177,6 +174,7 @@
 #include "unit_tests/juce_UnitTest.cpp"
 #include "containers/juce_Variant.cpp"
 #include "javascript/juce_JSON.cpp"
+#include "javascript/juce_JSONUtils.cpp"
 #include "javascript/juce_Javascript.cpp"
 #include "containers/juce_DynamicObject.cpp"
 #include "xml/juce_XmlDocument.cpp"
@@ -207,6 +205,7 @@
  #include "native/juce_SystemStats_mac.mm"
  #include "native/juce_Threads_mac.mm"
  #include "native/juce_PlatformTimer_generic.cpp"
+ #include "native/juce_Process_mac.mm"
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -277,8 +276,15 @@
 #if JUCE_UNIT_TESTS
  #include "containers/juce_HashMap_test.cpp"
  #include "containers/juce_Optional_test.cpp"
+ #include "containers/juce_Enumerate_test.cpp"
  #include "maths/juce_MathsFunctions_test.cpp"
  #include "misc/juce_EnumHelpers_test.cpp"
+ #include "containers/juce_FixedSizeFunction_test.cpp"
+ #include "javascript/juce_JSONSerialisation_test.cpp"
+ #include "memory/juce_SharedResourcePointer_test.cpp"
+ #if JUCE_MAC || JUCE_IOS
+  #include "native/juce_ObjCHelpers_mac_test.mm"
+ #endif
 #endif
 
 //==============================================================================

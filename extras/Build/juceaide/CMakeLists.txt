@@ -1,19 +1,12 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE library.
-#  Copyright (c) 2022 - Raw Material Software Limited
+#  This file is part of the JUCE 8 technical preview.
+#  Copyright (c) Raw Material Software Limited
 #
-#  JUCE is an open source library subject to commercial or open-source
-#  licensing.
+#  You may use this code under the terms of the GPL v3
+#  (see www.gnu.org/licenses).
 #
-#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-#  Agreement and JUCE Privacy Policy.
-#
-#  End User License Agreement: www.juce.com/juce-7-licence
-#  Privacy Policy: www.juce.com/juce-privacy-policy
-#
-#  Or: You may also use this code under the terms of the GPL v3 (see
-#  www.gnu.org/licenses).
+#  For the technical preview this file cannot be licensed commercially.
 #
 #  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
 #  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -34,7 +27,11 @@ if(JUCE_BUILD_HELPER_TOOLS)
 
     target_compile_definitions(juceaide PRIVATE
         JUCE_DISABLE_JUCE_VERSION_PRINTING=1
-        JUCE_USE_CURL=0)
+        JUCE_USE_CURL=0
+        # This is a temporary workaround to allow builds to complete on Xcode 15.
+        # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
+        # deploy to older versions of macOS.
+        JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
 
     target_link_libraries(juceaide PRIVATE
         juce::juce_build_tools
@@ -49,16 +46,8 @@ if(JUCE_BUILD_HELPER_TOOLS)
            NAMESPACE juce_tools::
            FILE "${JUCE_BINARY_DIR}/JUCEToolsExport.cmake")
 else()
-    set(extra_compiler_flag_arguments)
+    message(STATUS "Configuring juceaide")
 
-    # If we're building using the NDK, the gradle wrapper will try to inject its own compiler using
-    # environment variables, which is unfortunate because we really don't want to cross-compile
-    # juceaide.
-    # Similarly, when cross-compiling from Linux->Windows (e.g. using
-    # Fedora's mingw64-cmake command), the environment might be configured
-    # for cross-compiling, and we'll need to attempt to put it back to the
-    # host settings in order to build an executable that can run on the host
-    # machine.
     if(CMAKE_CROSSCOMPILING)
         unset(ENV{ADDR2LINE})
         unset(ENV{AR})
@@ -99,13 +88,12 @@ else()
         if(DEFINED ENV{PATH_ORIG})
             set(ENV{PATH} "$ENV{PATH_ORIG}")
         endif()
-    else()
-        set(extra_compiler_flag_arguments
-            "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
-            "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
     endif()
 
-    message(STATUS "Configuring juceaide")
+    # Generator platform is only supported on specific generators
+    if(CMAKE_GENERATOR MATCHES "^Visual Studio.*$")
+        set(ENV{CMAKE_GENERATOR_PLATFORM} "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+    endif()
 
     # Looks like we're bootstrapping, reinvoke CMake
     execute_process(COMMAND "${CMAKE_COMMAND}"

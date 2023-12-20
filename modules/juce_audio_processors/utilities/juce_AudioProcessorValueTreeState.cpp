@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -60,7 +53,7 @@ void AudioProcessorValueTreeState::Parameter::valueChanged (float newValue)
 }
 
 //==============================================================================
-class AudioProcessorValueTreeState::ParameterAdapter   : private AudioProcessorParameter::Listener
+class AudioProcessorValueTreeState::ParameterAdapter final : private AudioProcessorParameter::Listener
 {
 private:
     using Listener = AudioProcessorValueTreeState::Listener;
@@ -208,7 +201,7 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& proc
                                                             ParameterLayout parameterLayout)
     : AudioProcessorValueTreeState (processorToConnectTo, undoManagerToUse)
 {
-    struct PushBackVisitor : ParameterLayout::Visitor
+    struct PushBackVisitor final : ParameterLayout::Visitor
     {
         explicit PushBackVisitor (AudioProcessorValueTreeState& stateIn)
             : state (&stateIn) {}
@@ -506,7 +499,7 @@ AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessor
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct ParameterAdapterTests  : public UnitTest
+struct ParameterAdapterTests final : public UnitTest
 {
     ParameterAdapterTests()
         : UnitTest ("Parameter Adapter", UnitTestCategories::audioProcessorParameters)
@@ -600,7 +593,7 @@ inline bool operator!= (const NormalisableRange<ValueType>& a,
 }
 } // namespace
 
-class AudioProcessorValueTreeStateTests  : public UnitTest
+class AudioProcessorValueTreeStateTests final : public UnitTest
 {
 private:
     using Parameter = AudioProcessorValueTreeState::Parameter;
@@ -608,7 +601,7 @@ private:
     using ParameterLayout = AudioProcessorValueTreeState::ParameterLayout;
     using Attributes = AudioProcessorValueTreeStateParameterAttributes;
 
-    class TestAudioProcessor : public AudioProcessor
+    class TestAudioProcessor final : public AudioProcessor
     {
     public:
         TestAudioProcessor() = default;

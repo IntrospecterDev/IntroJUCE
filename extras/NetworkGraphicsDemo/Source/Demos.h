@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -24,7 +17,7 @@
 */
 
 
-struct BlankCanvas  : public AnimatedContent
+struct BlankCanvas final : public AnimatedContent
 {
     String getName() const override      { return "Blank Canvas"; }
     void reset() override {}
@@ -33,7 +26,7 @@ struct BlankCanvas  : public AnimatedContent
 };
 
 //==============================================================================
-struct GridLines  : public AnimatedContent
+struct GridLines final : public AnimatedContent
 {
     String getName() const override      { return "Grid Lines"; }
     void reset() override {}
@@ -64,7 +57,7 @@ struct GridLines  : public AnimatedContent
 };
 
 //==============================================================================
-struct BackgroundLogo  : public AnimatedContent
+struct BackgroundLogo : public AnimatedContent
 {
     BackgroundLogo()
     {
@@ -99,7 +92,7 @@ struct BackgroundLogo  : public AnimatedContent
 };
 
 //==============================================================================
-struct FlockDemo  : public BackgroundLogo
+struct FlockDemo : public BackgroundLogo
 {
     String getName() const override      { return "Flock"; }
 
@@ -158,7 +151,7 @@ struct FlockDemo  : public BackgroundLogo
 
         for (int i = 0; i < birds.size(); ++i)
             for (int j = i + 1; j < birds.size(); ++j)
-                attractBirds (birds.getReference(i), birds.getReference(j));
+                attractBirds (birds.getReference (i), birds.getReference (j));
 
         for (auto& b : birds)
         {
@@ -172,8 +165,8 @@ struct FlockDemo  : public BackgroundLogo
 
         for (int i = rings.size(); --i >= 0;)
         {
-            if (rings.getReference(i).update())
-                rings.getReference(i).draw (g);
+            if (rings.getReference (i).update())
+                rings.getReference (i).draw (g);
             else
                 rings.remove (i);
         }
@@ -358,7 +351,7 @@ struct FlockDemo  : public BackgroundLogo
 };
 
 //==============================================================================
-struct FlockWithText  : public FlockDemo
+struct FlockWithText final : public FlockDemo
 {
     FlockWithText()
     {
@@ -445,7 +438,7 @@ struct FlockWithText  : public FlockDemo
 };
 
 //==============================================================================
-struct SmallFlock  : public FlockDemo
+struct SmallFlock final : public FlockDemo
 {
     String getName() const override      { return "Small Flock"; }
 
@@ -456,7 +449,7 @@ struct SmallFlock  : public FlockDemo
 };
 
 //==============================================================================
-struct BigFlock  : public FlockDemo
+struct BigFlock final : public FlockDemo
 {
     String getName() const override      { return "Big Flock"; }
 
@@ -468,7 +461,7 @@ struct BigFlock  : public FlockDemo
 
 //==============================================================================
 template <int numHorizontalLogos>
-struct MultiLogo  : public BackgroundLogo
+struct MultiLogo final : public BackgroundLogo
 {
     String getName() const override      { return "Multi-Logo " + String ((int) numHorizontalLogos); }
 

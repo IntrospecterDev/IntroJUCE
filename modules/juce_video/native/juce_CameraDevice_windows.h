@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -67,7 +60,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             }
         }
 
-        hr = graphBuilder->AddFilter (filter, _T("Video Capture"));
+        hr = graphBuilder->AddFilter (filter, _T ("Video Capture"));
         if (FAILED (hr))
             return;
 
@@ -75,7 +68,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         if (FAILED (hr))
             return;
 
-        hr = graphBuilder->AddFilter (smartTee, _T("Smart Tee"));
+        hr = graphBuilder->AddFilter (smartTee, _T ("Smart Tee"));
         if (FAILED (hr))
             return;
 
@@ -105,7 +98,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         callback = new GrabberCallback (*this);
         hr = sampleGrabber->SetCallback (callback, 1);
 
-        hr = graphBuilder->AddFilter (sampleGrabberBase, _T("Sample Grabber"));
+        hr = graphBuilder->AddFilter (sampleGrabberBase, _T ("Sample Grabber"));
         if (FAILED (hr))
             return;
 
@@ -130,7 +123,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
         ComSmartPtr<ComTypes::IBaseFilter> nullFilter;
         hr = nullFilter.CoCreateInstance (ComTypes::CLSID_NullRenderer);
-        hr = graphBuilder->AddFilter (nullFilter, _T("Null Renderer"));
+        hr = graphBuilder->AddFilter (nullFilter, _T ("Null Renderer"));
 
         if (connectFilters (sampleGrabberBase, nullFilter)
               && addGraphToRot())
@@ -245,9 +238,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                                        if (weakRef == nullptr)
                                            return;
 
-                                       if (weakRef->pictureTakenCallback != nullptr)
-                                           weakRef->pictureTakenCallback (image);
-
+                                       NullCheckedInvocation::invoke (weakRef->pictureTakenCallback, image);
                                        weakRef->pictureTakenCallback = nullptr;
                                    });
     }
@@ -351,7 +342,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
                 if (SUCCEEDED (hr))
                 {
-                    hr = graphBuilder->AddFilter (asfWriter, _T("AsfWriter"));
+                    hr = graphBuilder->AddFilter (asfWriter, _T ("AsfWriter"));
 
                     if (SUCCEEDED (hr))
                     {
@@ -498,7 +489,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                             VARIANT var;
                             var.vt = VT_BSTR;
 
-                            hr = propertyBag->Read (_T("FriendlyName"), &var, nullptr);
+                            hr = propertyBag->Read (_T ("FriendlyName"), &var, nullptr);
                             propertyBag = nullptr;
 
                             if (SUCCEEDED (hr))
@@ -731,7 +722,7 @@ private:
 
         ComSmartPtr<IMoniker> moniker;
         WCHAR buffer[128]{};
-        HRESULT hr = CreateItemMoniker (_T("!"), buffer, moniker.resetAndGetPointerAddress());
+        HRESULT hr = CreateItemMoniker (_T ("!"), buffer, moniker.resetAndGetPointerAddress());
         if (FAILED (hr))
             return false;
 
@@ -826,7 +817,7 @@ private:
 void CameraDevice::Pimpl::disconnectAnyViewers()
 {
     for (int i = viewerComps.size(); --i >= 0;)
-        viewerComps.getUnchecked(i)->ownerDeleted();
+        viewerComps.getUnchecked (i)->ownerDeleted();
 }
 
 String CameraDevice::getFileExtension()

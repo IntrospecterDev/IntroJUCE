@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -124,7 +120,7 @@ static String getOboeString (const Type& value)
 }
 
 //==============================================================================
-class OboeAudioIODevice  : public AudioIODevice
+class OboeAudioIODevice final : public AudioIODevice
 {
 public:
     //==============================================================================
@@ -370,7 +366,7 @@ private:
 
         // providing a callback is required on some devices to get a FAST track, so we pass an
         // empty one to the temp stream to get the best available buffer size
-        struct DummyCallback  : public oboe::AudioStreamCallback
+        struct DummyCallback final : public oboe::AudioStreamCallback
         {
             oboe::DataCallbackResult onAudioReady (oboe::AudioStream*, void*, int32_t) override  { return oboe::DataCallbackResult::Stop; }
         };
@@ -609,7 +605,7 @@ private:
     };
 
     //==============================================================================
-    class OboeSessionBase   : protected oboe::AudioStreamCallback
+    class OboeSessionBase : protected oboe::AudioStreamCallback
     {
     public:
         static OboeSessionBase* create (OboeAudioIODevice& owner,
@@ -730,7 +726,7 @@ private:
 
     //==============================================================================
     template <typename SampleType>
-    class OboeSessionImpl   : public OboeSessionBase
+    class OboeSessionImpl final : public OboeSessionBase
     {
     public:
         OboeSessionImpl (OboeAudioIODevice& ownerToUse,
@@ -1038,7 +1034,7 @@ OboeAudioIODevice::OboeSessionBase* OboeAudioIODevice::OboeSessionBase::create (
 }
 
 //==============================================================================
-class OboeAudioIODeviceType  : public AudioIODeviceType
+class OboeAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     OboeAudioIODeviceType()
@@ -1302,7 +1298,7 @@ const char* const OboeAudioIODevice::oboeTypeName = "Android Oboe";
 bool isOboeAvailable()  { return OboeAudioIODeviceType::isOboeAvailable(); }
 
 //==============================================================================
-class OboeRealtimeThread    : private oboe::AudioStreamCallback
+class OboeRealtimeThread final : private oboe::AudioStreamCallback
 {
     using OboeStream = OboeAudioIODevice::OboeStream;
 
@@ -1344,7 +1340,7 @@ public:
         return testStream != nullptr && testStream->openedOk();
     }
 
-    pthread_t startThread (void*(*entry)(void*), void* userPtr)
+    pthread_t startThread (void*(*entry) (void*), void* userPtr)
     {
         pthread_mutex_lock (&threadReadyMutex);
 

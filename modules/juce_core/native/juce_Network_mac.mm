@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -107,7 +103,7 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments ([[maybe_unused]] const Str
 }
 
 //==============================================================================
-class URLConnectionStateBase  : public Thread
+class URLConnectionStateBase : public Thread
 {
 public:
     explicit URLConnectionStateBase (NSURLRequest* req, int maxRedirects)
@@ -155,7 +151,7 @@ private:
 // so we'll turn off deprecation warnings. This code will be removed at some point
 // in the future.
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated")
-class URLConnectionStatePreYosemite  : public URLConnectionStateBase
+class URLConnectionStatePreYosemite final : public URLConnectionStateBase
 {
 public:
     URLConnectionStatePreYosemite (NSURLRequest* req, const int maxRedirects)
@@ -331,7 +327,7 @@ public:
 
 private:
     //==============================================================================
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass final : public ObjCClass<NSObject>
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCENetworkDelegate_")
         {
@@ -391,7 +387,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 //==============================================================================
-class API_AVAILABLE (macos (10.9)) URLConnectionState : public URLConnectionStateBase
+class API_AVAILABLE (macos (10.9)) URLConnectionState final : public URLConnectionStateBase
 {
 public:
     URLConnectionState (NSURLRequest* req, const int maxRedirects)
@@ -599,7 +595,7 @@ public:
 
 private:
     //==============================================================================
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass final : public ObjCClass<NSObject>
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCE_URLDelegate_")
         {
@@ -669,7 +665,7 @@ private:
 
 //==============================================================================
 #if JUCE_IOS
-struct BackgroundDownloadTask  : public URL::DownloadTask
+struct BackgroundDownloadTask final : public URL::DownloadTask
 {
     BackgroundDownloadTask (const URL& urlToUse,
                             const File& targetLocationToUse,
@@ -869,7 +865,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     }
 
     //==============================================================================
-    struct DelegateClass  : public ObjCClass<NSObject<NSURLSessionDelegate>>
+    struct DelegateClass final : public ObjCClass<NSObject<NSURLSessionDelegate>>
     {
         DelegateClass()  : ObjCClass<NSObject<NSURLSessionDelegate>> ("JUCE_URLDelegate_")
         {

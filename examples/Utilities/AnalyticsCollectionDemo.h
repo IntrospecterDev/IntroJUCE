@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -58,7 +58,7 @@ enum DemoAnalyticsEventTypes
 };
 
 //==============================================================================
-class GoogleAnalyticsDestination  : public ThreadedAnalyticsDestination
+class GoogleAnalyticsDestination final : public ThreadedAnalyticsDestination
 {
 public:
     GoogleAnalyticsDestination()
@@ -199,7 +199,7 @@ public:
 
         shouldExit = true;
 
-        if (webStream.get() != nullptr)
+        if (webStream != nullptr)
             webStream->cancel();
     }
 
@@ -298,7 +298,7 @@ private:
 };
 
 //==============================================================================
-class AnalyticsCollectionDemo   : public Component
+class AnalyticsCollectionDemo final : public Component
 {
 public:
     //==============================================================================

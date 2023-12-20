@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -22,8 +15,6 @@
 
   ==============================================================================
 */
-
-#include "juce_CGMetalLayerRenderer_mac.h"
 
 @interface NSEvent (DeviceDelta)
 - (float)deviceDeltaX;
@@ -122,7 +113,7 @@ static constexpr int translateVirtualToAsciiKeyCode (int keyCode) noexcept
 constexpr int extendedKeyModifier = 0x30000;
 
 //==============================================================================
-class JuceCALayerDelegate : public ObjCClass<NSObject<CALayerDelegate>>
+class JuceCALayerDelegate final : public ObjCClass<NSObject<CALayerDelegate>>
 {
 public:
     struct Callback
@@ -168,8 +159,8 @@ private:
 };
 
 //==============================================================================
-class NSViewComponentPeer  : public ComponentPeer,
-                             private JuceCALayerDelegate::Callback
+class NSViewComponentPeer final : public ComponentPeer,
+                                  private JuceCALayerDelegate::Callback
 {
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
@@ -1039,8 +1030,8 @@ public:
             if (! clip.isEmpty())
             {
                 Image temp (component.isOpaque() ? Image::RGB : Image::ARGB,
-                            roundToInt (clipW * displayScale),
-                            roundToInt (clipH * displayScale),
+                            roundToInt ((float) clipW * displayScale),
+                            roundToInt ((float) clipH * displayScale),
                             ! component.isOpaque());
 
                 {
@@ -1759,7 +1750,7 @@ private:
     // avoid unnecessarily duplicating display-link threads.
     SharedResourcePointer<PerScreenDisplayLinks> sharedDisplayLinks;
 
-    class AsyncRepainter : private AsyncUpdater
+    class AsyncRepainter final : private AsyncUpdater
     {
     public:
         explicit AsyncRepainter (NSViewComponentPeer& o) : owner (o) {}
@@ -1896,7 +1887,7 @@ private:
             case NSEventTypeRightMouseUp:
             case NSEventTypeOtherMouseUp:
             case NSEventTypeOtherMouseDragged:
-                if (Desktop::getInstance().getDraggingMouseSource(0) != nullptr)
+                if (Desktop::getInstance().getDraggingMouseSource (0) != nullptr)
                     return false;
                 break;
 
@@ -2009,7 +2000,7 @@ private:
 
 //==============================================================================
 template <typename Base>
-struct NSViewComponentPeerWrapper  : public Base
+struct NSViewComponentPeerWrapper : public Base
 {
     explicit NSViewComponentPeerWrapper (const char* baseName)
         : Base (baseName)
@@ -2033,7 +2024,7 @@ struct NSViewComponentPeerWrapper  : public Base
 };
 
 //==============================================================================
-struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
+struct JuceNSViewClass final : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 {
     JuceNSViewClass()  : NSViewComponentPeerWrapper ("JUCEView_")
     {
@@ -2103,6 +2094,10 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 
         addMethod (@selector (draggingEnded:),                  draggingExited);
         addMethod (@selector (draggingExited:),                 draggingExited);
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        addMethod (@selector (clipsToBounds), [] (id, SEL) { return YES; });
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         addMethod (@selector (acceptsFirstMouse:), [] (id, SEL, NSEvent*) { return YES; });
 
@@ -2600,7 +2595,7 @@ private:
 };
 
 //==============================================================================
-struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindow>>
+struct JuceNSWindowClass final : public NSViewComponentPeerWrapper<ObjCClass<NSWindow>>
 {
     JuceNSWindowClass()  : NSViewComponentPeerWrapper ("JUCEWindow_")
     {

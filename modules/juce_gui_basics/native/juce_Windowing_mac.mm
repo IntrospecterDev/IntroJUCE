@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -53,7 +46,7 @@ static NSView* getNSViewForDragEvent (Component* sourceComp)
     return nil;
 }
 
-class NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
+class NSDraggingSourceHelper final : public ObjCClass<NSObject<NSDraggingSource>>
 {
 public:
     static void setText (id self, const String& text)
@@ -312,7 +305,7 @@ public:
     }
 
 private:
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass final : public ObjCClass<NSObject>
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
         {
@@ -333,7 +326,7 @@ std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNative
 }
 
 //==============================================================================
-class ScreenSaverDefeater   : public Timer
+class ScreenSaverDefeater final : public Timer
 {
 public:
     ScreenSaverDefeater()
@@ -394,7 +387,7 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-struct DisplaySettingsChangeCallback  : private DeletedAtShutdown
+struct DisplaySettingsChangeCallback final : private DeletedAtShutdown
 {
     DisplaySettingsChangeCallback()
     {
@@ -410,8 +403,7 @@ struct DisplaySettingsChangeCallback  : private DeletedAtShutdown
     static void displayReconfigurationCallback (CGDirectDisplayID, CGDisplayChangeSummaryFlags, void* userInfo)
     {
         if (auto* thisPtr = static_cast<DisplaySettingsChangeCallback*> (userInfo))
-            if (thisPtr->forceDisplayUpdate != nullptr)
-                thisPtr->forceDisplayUpdate();
+            NullCheckedInvocation::invoke (thisPtr->forceDisplayUpdate);
     }
 
     std::function<void()> forceDisplayUpdate;
@@ -446,6 +438,17 @@ static Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenB
 
     NSSize dpi = [[[s deviceDescription] objectForKey: NSDeviceResolution] sizeValue];
     d.dpi = (dpi.width + dpi.height) / 2.0;
+
+   #if defined (MAC_OS_VERSION_12_0) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_VERSION_12_0
+    if (@available (macOS 12.0, *))
+    {
+        const auto safeInsets = [s safeAreaInsets];
+        d.safeAreaInsets = detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
+                                                                                      safeInsets.left,
+                                                                                      safeInsets.bottom,
+                                                                                      safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
+    }
+   #endif
 
     return d;
 }
@@ -573,15 +576,6 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 String SystemClipboard::getTextFromClipboard()
 {
     return nsStringToJuce ([[NSPasteboard generalPasteboard] stringForType: NSPasteboardTypeString]);
-}
-
-void Process::setDockIconVisible (bool isVisible)
-{
-    ProcessSerialNumber psn { 0, kCurrentProcess };
-
-    [[maybe_unused]] OSStatus err = TransformProcessType (&psn, isVisible ? kProcessTransformToForegroundApplication
-                                                                          : kProcessTransformToUIElementApplication);
-    jassert (err == 0);
 }
 
 } // namespace juce

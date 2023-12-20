@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -23,15 +16,11 @@
   ==============================================================================
 */
 
-#if JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS
- #include "juce_LinuxSubprocessHelperBinaryData.h"
-#endif
-
 namespace juce
 {
 
 //==============================================================================
-class WebKitSymbols  : public DeletedAtShutdown
+class WebKitSymbols final : public DeletedAtShutdown
 {
 public:
     //==============================================================================
@@ -348,7 +337,7 @@ private:
     WebKitSymbols::getInstance()->juce_g_signal_connect_data (instance, detailed_signal, c_handler, data, nullptr, (GConnectFlags) 0)
 
 //==============================================================================
-class GtkChildProcess : private CommandReceiver::Responder
+class GtkChildProcess final : private CommandReceiver::Responder
 {
 public:
     //==============================================================================
@@ -746,7 +735,7 @@ private:
             int status = 0, result = 0;
 
             result = waitpid (childProcess, &status, WNOHANG);
-            for (int i = 0; i < 15 && (! WIFEXITED(status) || result != childProcess); ++i)
+            for (int i = 0; i < 15 && (! WIFEXITED (status) || result != childProcess); ++i)
             {
                 Thread::sleep (100);
                 result = waitpid (childProcess, &status, WNOHANG);
@@ -754,7 +743,7 @@ private:
 
             // clean-up any zombies
             status = 0;
-            if (! WIFEXITED(status) || result != childProcess)
+            if (! WIFEXITED (status) || result != childProcess)
             {
                 for (;;)
                 {

@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -27,8 +20,8 @@
 
 
 //==============================================================================
-class FileTreeItemBase   : public JucerTreeViewBase,
-                           private ValueTree::Listener
+class FileTreeItemBase : public JucerTreeViewBase,
+                         private ValueTree::Listener
 {
 public:
     FileTreeItemBase (const Project::Item& projectItem)
@@ -101,7 +94,7 @@ public:
 
             for (auto i = fsToTrash.size(); --i >= 0;)
             {
-                auto f = fsToTrash.getUnchecked(i);
+                auto f = fsToTrash.getUnchecked (i);
 
                 om.closeFileWithoutSaving (f);
 
@@ -133,7 +126,7 @@ public:
             String fileList;
             auto maxFilesToList = 10;
             for (auto i = jmin (maxFilesToList, filesToTrash.size()); --i >= 0;)
-                fileList << filesToTrash.getUnchecked(i).getFullPathName() << "\n";
+                fileList << filesToTrash.getUnchecked (i).getFullPathName() << "\n";
 
             if (filesToTrash.size() > maxFilesToList)
                 fileList << "\n...plus " << (filesToTrash.size() - maxFilesToList) << " more files...";
@@ -187,7 +180,7 @@ public:
             StringArray files;
 
             for (int i = 0; i < fc.getResults().size(); ++i)
-                files.add (fc.getResults().getReference(i).getFullPathName());
+                files.add (fc.getResults().getReference (i).getFullPathName());
 
             addFilesRetainingSortOrder (files);
         });
@@ -250,7 +243,7 @@ public:
 
         for (auto i = getNumSubItems(); --i >= 0;)
         {
-            if (auto* pg = dynamic_cast<FileTreeItemBase*> (getSubItem(i)))
+            if (auto* pg = dynamic_cast<FileTreeItemBase*> (getSubItem (i)))
                 if (auto* found = pg->findTreeViewItem (itemToFind))
                     return found;
         }
@@ -275,7 +268,7 @@ public:
     void addSubItems() override
     {
         for (int i = 0; i < item.getNumChildren(); ++i)
-            if (auto* p = createSubItem (item.getChild(i)))
+            if (auto* p = createSubItem (item.getChild (i)))
                 addSubItem (p);
     }
 
@@ -398,7 +391,7 @@ protected:
 
     void triggerAsyncRename (const Project::Item& itemToRename)
     {
-        struct RenameMessage  : public CallbackMessage
+        struct RenameMessage final : public CallbackMessage
         {
             RenameMessage (TreeView* const t, const Project::Item& i)
                 : tree (t), itemToRename (i)  {}
@@ -423,7 +416,7 @@ protected:
     {
         for (auto i = selectedNodes.size(); --i >= 0;)
         {
-            auto* n = selectedNodes.getUnchecked(i);
+            auto* n = selectedNodes.getUnchecked (i);
 
             if (destNode == *n || destNode.state.isAChildOf (n->state)) // Check for recursion.
                 return;
@@ -435,11 +428,11 @@ protected:
         // Don't include any nodes that are children of other selected nodes..
         for (auto i = selectedNodes.size(); --i >= 0;)
         {
-            auto* n = selectedNodes.getUnchecked(i);
+            auto* n = selectedNodes.getUnchecked (i);
 
             for (auto j = selectedNodes.size(); --j >= 0;)
             {
-                if (j != i && n->state.isAChildOf (selectedNodes.getUnchecked(j)->state))
+                if (j != i && n->state.isAChildOf (selectedNodes.getUnchecked (j)->state))
                 {
                     selectedNodes.remove (i);
                     break;
@@ -450,7 +443,7 @@ protected:
         // Remove and re-insert them one at a time..
         for (int i = 0; i < selectedNodes.size(); ++i)
         {
-            auto* selectedNode = selectedNodes.getUnchecked(i);
+            auto* selectedNode = selectedNodes.getUnchecked (i);
 
             if (selectedNode->state.getParent() == destNode.state
                   && indexOfNode (destNode.state, selectedNode->state) < insertIndex)
@@ -479,7 +472,7 @@ private:
 };
 
 //==============================================================================
-class SourceFileItem   : public FileTreeItemBase
+class SourceFileItem final : public FileTreeItemBase
 {
 public:
     SourceFileItem (const Project::Item& projectItem)
@@ -651,7 +644,7 @@ public:
 };
 
 //==============================================================================
-class GroupItem   : public FileTreeItemBase
+class GroupItem final : public FileTreeItemBase
 {
 public:
     GroupItem (const Project::Item& projectItem, const String& filter = {})
@@ -672,7 +665,7 @@ public:
     bool acceptsDragItems (const OwnedArray<Project::Item>& selectedNodes) override
     {
         for (auto i = selectedNodes.size(); --i >= 0;)
-            if (item.canContain (*selectedNodes.getUnchecked(i)))
+            if (item.canContain (*selectedNodes.getUnchecked (i)))
                 return true;
 
         return false;
@@ -701,7 +694,7 @@ public:
     void checkFileStatus() override
     {
         for (int i = 0; i < getNumSubItems(); ++i)
-            if (auto* p = dynamic_cast<FileTreeItemBase*> (getSubItem(i)))
+            if (auto* p = dynamic_cast<FileTreeItemBase*> (getSubItem (i)))
                 p->checkFileStatus();
     }
 

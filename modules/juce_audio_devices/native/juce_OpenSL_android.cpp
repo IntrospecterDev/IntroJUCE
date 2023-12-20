@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -41,7 +37,7 @@ DECLARE_JNI_CLASS (AndroidAudioManager, "android/media/AudioManager")
 #endif
 
 //==============================================================================
-struct PCMDataFormatEx : SLDataFormat_PCM
+struct PCMDataFormatEx final : SLDataFormat_PCM
 {
     SLuint32 representation;
 };
@@ -106,7 +102,7 @@ public:
 
 private:
     //==============================================================================
-    struct ControlBlock : ReferenceCountedObject
+    struct ControlBlock final : ReferenceCountedObject
     {
         ControlBlock() = default;
         ControlBlock (SLObjectItf o) : ptr (o) {}
@@ -118,7 +114,7 @@ private:
 };
 
 template <typename T>
-class SlRef : public SlObjectRef
+class SlRef final : public SlObjectRef
 {
 public:
     //==============================================================================
@@ -312,7 +308,7 @@ OpenSLEngineHolder& getEngineHolder()
 class SLRealtimeThread;
 
 //==============================================================================
-class OpenSLAudioIODevice  : public AudioIODevice
+class OpenSLAudioIODevice final : public AudioIODevice
 {
 public:
     //==============================================================================
@@ -362,7 +358,7 @@ public:
                                                                &audioRoutingJni);
 
                     if (status == SL_RESULT_SUCCESS && audioRoutingJni != nullptr)
-                        javaProxy = GlobalRef (LocalRef<jobject>(getEnv()->NewLocalRef (audioRoutingJni)));
+                        javaProxy = GlobalRef (LocalRef<jobject> (getEnv()->NewLocalRef (audioRoutingJni)));
                 }
             }
 
@@ -391,7 +387,7 @@ public:
         }
 
         bool isBufferAvailable() const         { return (numBlocksOut.get() < owner.numBuffers); }
-        T* getNextBuffer()                     { nextBlock.set((nextBlock.get() + 1) % owner.numBuffers); return getCurrentBuffer(); }
+        T* getNextBuffer()                     { nextBlock.set ((nextBlock.get() + 1) % owner.numBuffers); return getCurrentBuffer(); }
         T* getCurrentBuffer()                  { return nativeBuffer.get() + (static_cast<size_t> (nextBlock.get()) * getBufferSizeInSamples()); }
         size_t getBufferSizeInSamples() const  { return static_cast<size_t> (owner.bufferSize * numChannels); }
 
@@ -427,7 +423,7 @@ public:
 
     //==============================================================================
     template <typename T>
-    struct OpenSLQueueRunnerPlayer      : OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>
+    struct OpenSLQueueRunnerPlayer final : OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>
     {
         using Base = OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>;
 
@@ -458,7 +454,7 @@ public:
                 auto status = e->CreateAudioPlayer (holder.engine, &obj, &source, &sink, 2,
                                                     queueInterfaces, interfaceRequired);
 
-                if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize(obj, 0) != SL_RESULT_SUCCESS)
+                if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
                 {
                     destroyObject (obj);
                     return {};
@@ -472,7 +468,7 @@ public:
     };
 
     template <typename T>
-    struct OpenSLQueueRunnerRecorder  : public OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>
+    struct OpenSLQueueRunnerRecorder final : public OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>
     {
         using Base = OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>;
 
@@ -611,7 +607,7 @@ public:
             else
             {
                 for (int i = 0; i < outputChannels; ++i)
-                    zeromem (outputChannelData[i], sizeof(float) * static_cast<size_t> (bufferSize));
+                    zeromem (outputChannelData[i], sizeof (float) * static_cast<size_t> (bufferSize));
             }
         }
 
@@ -631,7 +627,7 @@ public:
     };
 
     template <typename T>
-    class OpenSLSessionT : public OpenSLSession
+    class OpenSLSessionT final : public OpenSLSession
     {
     public:
         OpenSLSessionT (int numInputChannels, int numOutputChannels,
@@ -913,7 +909,7 @@ public:
             if (numInputChannels > 0 && numOutputChannels > 0 && RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
             {
                 // New versions of the Android emulator do not seem to support audio input anymore on OS X
-                activeInputChans = BigInteger(0);
+                activeInputChans = BigInteger (0);
                 numInputChannels = 0;
 
                 session.reset (OpenSLSession::create (numInputChannels, numOutputChannels,
@@ -1068,7 +1064,7 @@ OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (
 }
 
 //==============================================================================
-class OpenSLAudioDeviceType  : public AudioIODeviceType
+class OpenSLAudioDeviceType final : public AudioIODeviceType
 {
 public:
     OpenSLAudioDeviceType()  : AudioIODeviceType (OpenSLAudioIODevice::openSLTypeName) {}

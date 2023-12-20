@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -32,7 +25,7 @@ extern NSMenu* createNSMenu (const PopupMenu&, const String& name, int topLevelM
                              int topLevelIndex, bool addDelegate);
 
 //==============================================================================
-struct StatusItemContainer   : public Timer
+struct StatusItemContainer : public Timer
 {
     //==============================================================================
     StatusItemContainer (SystemTrayIconComponent& iconComp, const Image& im)
@@ -87,7 +80,7 @@ struct StatusItemContainer   : public Timer
 };
 
 //==============================================================================
-struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem : public StatusItemContainer
+struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem  final : public StatusItemContainer
 {
     //==============================================================================
     ButtonBasedStatusItem (SystemTrayIconComponent& iconComp, const Image& im)
@@ -178,7 +171,7 @@ struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem : public StatusItemCo
     }
 
     //==============================================================================
-    class ButtonEventForwarderClass   : public ObjCClass<NSObject>
+    class ButtonEventForwarderClass final : public ObjCClass<NSObject>
     {
     public:
         ButtonEventForwarderClass() : ObjCClass<NSObject> ("JUCEButtonEventForwarderClass_")
@@ -206,7 +199,7 @@ struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem : public StatusItemCo
 };
 
 //==============================================================================
-struct ViewBasedStatusItem   : public StatusItemContainer
+struct ViewBasedStatusItem final : public StatusItemContainer
 {
     //==============================================================================
     ViewBasedStatusItem (SystemTrayIconComponent& iconComp, const Image& im)
@@ -305,7 +298,7 @@ struct ViewBasedStatusItem   : public StatusItemContainer
     }
 
     //==============================================================================
-    struct SystemTrayViewClass : public ObjCClass<NSControl>
+    struct SystemTrayViewClass final : public ObjCClass<NSControl>
     {
         SystemTrayViewClass()  : ObjCClass<NSControl> ("JUCESystemTrayView_")
         {

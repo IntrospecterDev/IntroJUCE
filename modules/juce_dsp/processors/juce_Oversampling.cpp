@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -23,9 +16,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /** Abstract class for the provided oversampling stages used internally in
@@ -70,7 +61,7 @@ struct Oversampling<SampleType>::OversamplingStage
     signal, which could be equivalent to a "one time" oversampling processing.
 */
 template <typename SampleType>
-struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
+struct OversamplingDummy final : public Oversampling<SampleType>::OversamplingStage
 {
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
@@ -110,7 +101,7 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
     leading to specific processing optimizations.
 */
 template <typename SampleType>
-struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::OversamplingStage
+struct Oversampling2TimesEquirippleFIR final : public Oversampling<SampleType>::OversamplingStage
 {
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
@@ -262,7 +253,7 @@ private:
     phase, and provided with a method to get the exact resulting latency.
 */
 template <typename SampleType>
-struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::OversamplingStage
+struct Oversampling2TimesPolyphaseIIR final : public Oversampling<SampleType>::OversamplingStage
 {
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
@@ -729,11 +720,11 @@ void Oversampling<SampleType>::processSamplesDown (AudioBlock<SampleType>& outpu
     auto currentNumSamples = outputBlock.getNumSamples();
 
     for (int n = 0; n < stages.size() - 1; ++n)
-        currentNumSamples *= stages.getUnchecked(n)->factor;
+        currentNumSamples *= stages.getUnchecked (n)->factor;
 
     for (int n = stages.size() - 1; n > 0; --n)
     {
-        auto& stage = *stages.getUnchecked(n);
+        auto& stage = *stages.getUnchecked (n);
         auto audioBlock = stages.getUnchecked (n - 1)->getProcessedSamples (currentNumSamples);
         stage.processSamplesDown (audioBlock);
 
@@ -766,5 +757,4 @@ void Oversampling<SampleType>::updateDelayLine()
 template class Oversampling<float>;
 template class Oversampling<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

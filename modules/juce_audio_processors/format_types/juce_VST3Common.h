@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -100,8 +93,8 @@ public:
     {
         const auto toReturn = result.extract (obj);
 
-        if (result.isOk() && addRefFn != nullptr && *obj != nullptr)
-            addRefFn (*obj);
+        if (result.isOk() && *obj != nullptr)
+            NullCheckedInvocation::invoke (addRefFn, *obj);
 
         return toReturn;
     }
@@ -1166,31 +1159,35 @@ private:
 };
 
 //==============================================================================
+// We have to trust that Steinberg won't double-delete
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDelete)
 template <class ObjectType>
 class VSTComSmartPtr
 {
 public:
-    VSTComSmartPtr() noexcept : source (nullptr) {}
-    VSTComSmartPtr (ObjectType* object, bool autoAddRef = true) noexcept  : source (object)  { if (source != nullptr && autoAddRef) source->addRef(); }
+    VSTComSmartPtr() = default;
     VSTComSmartPtr (const VSTComSmartPtr& other) noexcept : source (other.source)            { if (source != nullptr) source->addRef(); }
     ~VSTComSmartPtr()                                                                        { if (source != nullptr) source->release(); }
 
-    operator ObjectType*() const noexcept    { return source; }
-    ObjectType* get() const noexcept         { return source; }
-    ObjectType& operator*() const noexcept   { return *source; }
-    ObjectType* operator->() const noexcept  { return source; }
+    explicit operator bool() const noexcept           { return operator!= (nullptr); }
+    ObjectType* get() const noexcept                  { return source; }
+    ObjectType& operator*() const noexcept            { return *source; }
+    ObjectType* operator->() const noexcept           { return source; }
 
-    VSTComSmartPtr& operator= (const VSTComSmartPtr& other)       { return operator= (other.source); }
-
-    VSTComSmartPtr& operator= (ObjectType* const newObjectToTakePossessionOf)
+    VSTComSmartPtr& operator= (const VSTComSmartPtr& other)
     {
-        VSTComSmartPtr p (newObjectToTakePossessionOf);
+        auto p = other;
         std::swap (p.source, source);
         return *this;
     }
 
-    bool operator== (ObjectType* const other) noexcept { return source == other; }
-    bool operator!= (ObjectType* const other) noexcept { return source != other; }
+    VSTComSmartPtr& operator= (std::nullptr_t)
+    {
+        return operator= (VSTComSmartPtr{});
+    }
+
+    bool operator== (std::nullptr_t) const noexcept { return source == nullptr; }
+    bool operator!= (std::nullptr_t) const noexcept { return source != nullptr; }
 
     bool loadFrom (Steinberg::FUnknown* o)
     {
@@ -1205,9 +1202,38 @@ public:
         return factory->createInstance (uuid, ObjectType::iid, (void**) &source) == Steinberg::kResultOk;
     }
 
+    /** Increments refcount. */
+    static auto addOwner (ObjectType* t)
+    {
+        return VSTComSmartPtr (t, true);
+    }
+
+    /** Does not initially increment refcount; assumes t has a positive refcount. */
+    static auto becomeOwner (ObjectType* t)
+    {
+        return VSTComSmartPtr (t, false);
+    }
+
 private:
-    ObjectType* source;
+    explicit VSTComSmartPtr (ObjectType* object, bool autoAddRef) noexcept  : source (object)  { if (source != nullptr && autoAddRef) source->addRef(); }
+    ObjectType* source = nullptr;
 };
+
+/** Increments refcount. */
+template <class ObjectType>
+auto addVSTComSmartPtrOwner (ObjectType* t)
+{
+    return VSTComSmartPtr<ObjectType>::addOwner (t);
+}
+
+/** Does not initially increment refcount; assumes t has a positive refcount. */
+template <class ObjectType>
+auto becomeVSTComSmartPtrOwner (ObjectType* t)
+{
+    return VSTComSmartPtr<ObjectType>::becomeOwner (t);
+}
+
+// NOLINTEND(clang-analyzer-cplusplus.NewDelete)
 
 //==============================================================================
 /*  This class stores a plugin's preferred MIDI mappings.
@@ -1457,12 +1483,14 @@ private:
         return e;
     }
 
-    static Steinberg::Vst::Event createSysExEvent (const MidiMessage& msg, const uint8* midiEventData) noexcept
+    static Steinberg::Vst::Event createSysExEvent (const MidiMessage& msg, const uint8* data) noexcept
     {
+        jassert (msg.isSysEx());
+
         Steinberg::Vst::Event e{};
         e.type          = Steinberg::Vst::Event::kDataEvent;
-        e.data.bytes    = midiEventData + 1;
-        e.data.size     = (uint32) msg.getSysExDataSize();
+        e.data.bytes    = data;
+        e.data.size     = (uint32) msg.getRawDataSize();
         e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
         return e;
     }
@@ -1616,6 +1644,28 @@ private:
         }
     }
 
+    static Optional<MidiMessage> toMidiMessage (const Steinberg::Vst::DataEvent& e)
+    {
+        if (e.type != Steinberg::Vst::DataEvent::kMidiSysEx || e.size < 2)
+        {
+            // Only sysex data messages can be converted to MIDI
+            jassertfalse;
+            return {};
+        }
+
+        const auto header = e.bytes[0];
+        const auto footer = e.bytes[e.size - 1];
+
+        if (header != 0xf0 || footer != 0xf7)
+        {
+            // The sysex header/footer bytes are missing
+            jassertfalse;
+            return {};
+        }
+
+        return MidiMessage::createSysExMessage (e.bytes + 1, (int) e.size - 2);
+    }
+
     static Optional<MidiMessage> toMidiMessage (const Steinberg::Vst::Event& e)
     {
         switch (e.type)
@@ -1636,7 +1686,7 @@ private:
                                                       (Steinberg::uint8) denormaliseToMidiValue (e.polyPressure.pressure));
 
             case Steinberg::Vst::Event::kDataEvent:
-                return MidiMessage::createSysExMessage (e.data.bytes, (int) e.data.size);
+                return toMidiMessage (e.data);
 
             case Steinberg::Vst::Event::kLegacyMIDICCOutEvent:
                 return toMidiMessage (e.midiCCOut);
@@ -1704,8 +1754,15 @@ public:
 
     Steinberg::Vst::ParamID getParamID (Steinberg::int32 index) const noexcept { return paramIds[(size_t) index]; }
 
-    void set                 (Steinberg::int32 index, float value)   { floatCache.setValueAndBits ((size_t) index, value, 1); }
-    void setWithoutNotifying (Steinberg::int32 index, float value)   { floatCache.setValue        ((size_t) index, value); }
+    void set (Steinberg::int32 index, float value)
+    {
+        floatCache.setValueAndBits ((size_t) index, value, 1);
+    }
+
+    float exchangeWithoutNotifying (Steinberg::int32 index, float value)
+    {
+        return floatCache.exchangeValue ((size_t) index, value);
+    }
 
     float get (Steinberg::int32 index) const noexcept { return floatCache.get ((size_t) index); }
 

@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -32,7 +28,7 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            7.0.7
+  version:            7.0.9
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
@@ -246,6 +242,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "memory/juce_ScopedPointer.h"
 #include "memory/juce_OptionalScopedPointer.h"
 #include "containers/juce_Optional.h"
+#include "containers/juce_Enumerate.h"
 #include "containers/juce_ScopedValueSetter.h"
 #include "memory/juce_Singleton.h"
 #include "memory/juce_WeakReference.h"
@@ -259,6 +256,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "containers/juce_ArrayBase.h"
 #include "containers/juce_Array.h"
 #include "containers/juce_LinkedListPointer.h"
+#include "misc/juce_ScopeGuard.h"
 #include "containers/juce_ListenerList.h"
 #include "containers/juce_OwnedArray.h"
 #include "containers/juce_ReferenceCountedArray.h"
@@ -283,8 +281,10 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "misc/juce_ConsoleApplication.h"
 #include "containers/juce_Variant.h"
 #include "containers/juce_NamedValueSet.h"
+#include "javascript/juce_JSON.h"
 #include "containers/juce_DynamicObject.h"
 #include "containers/juce_HashMap.h"
+#include "containers/juce_FixedSizeFunction.h"
 #include "time/juce_RelativeTime.h"
 #include "time/juce_Time.h"
 #include "streams/juce_InputStream.h"
@@ -306,7 +306,9 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "files/juce_WildcardFileFilter.h"
 #include "streams/juce_FileInputSource.h"
 #include "logging/juce_FileLogger.h"
-#include "javascript/juce_JSON.h"
+#include "javascript/juce_JSONUtils.h"
+#include "serialisation/juce_Serialisation.h"
+#include "javascript/juce_JSONSerialisation.h"
 #include "javascript/juce_Javascript.h"
 #include "maths/juce_BigInteger.h"
 #include "maths/juce_Expression.h"
@@ -349,6 +351,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "streams/juce_AndroidDocumentInputSource.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
+ #include "native/juce_CFHelpers_mac.h"
  #include "native/juce_ObjCHelpers_mac.h"
 #endif
 

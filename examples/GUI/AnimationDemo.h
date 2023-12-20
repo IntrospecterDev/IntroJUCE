@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -50,7 +50,7 @@
 
 //==============================================================================
 /** This will be the source of our balls and can be dragged around. */
-class BallGeneratorComponent    : public Component
+class BallGeneratorComponent final : public Component
 {
 public:
     BallGeneratorComponent() {}
@@ -93,7 +93,7 @@ private:
 };
 
 //==============================================================================
-struct BallComponent  : public Component
+struct BallComponent final : public Component
 {
     BallComponent (Point<float> pos)
         : position (pos),
@@ -136,8 +136,8 @@ struct BallComponent  : public Component
 };
 
 //==============================================================================
-class AnimationDemo  : public Component,
-                       private Timer
+class AnimationDemo final : public Component,
+                            private Timer
 {
 public:
     AnimationDemo()

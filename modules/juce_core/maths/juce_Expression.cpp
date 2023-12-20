@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -23,7 +19,7 @@
 namespace juce
 {
 
-class Expression::Term  : public SingleThreadedReferenceCountedObject
+class Expression::Term : public SingleThreadedReferenceCountedObject
 {
 public:
     Term() {}
@@ -69,7 +65,7 @@ public:
     virtual void visitAllSymbols (SymbolVisitor& visitor, const Scope& scope, int recursionDepth)
     {
         for (int i = getNumInputs(); --i >= 0;)
-            getInput(i)->visitAllSymbols (visitor, scope, recursionDepth);
+            getInput (i)->visitAllSymbols (visitor, scope, recursionDepth);
     }
 
 private:
@@ -92,7 +88,7 @@ struct Expression::Helpers
 
     //==============================================================================
     /** An exception that can be thrown by Expression::evaluate(). */
-    class EvaluationError  : public std::exception
+    class EvaluationError final : public std::exception
     {
     public:
         EvaluationError (const String& desc)  : description (desc)
@@ -104,7 +100,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Constant  : public Term
+    class Constant final : public Term
     {
     public:
         Constant (double val, bool resolutionTarget)
@@ -193,7 +189,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class SymbolTerm  : public Term
+    class SymbolTerm final : public Term
     {
     public:
         explicit SymbolTerm (const String& sym) : symbol (sym) {}
@@ -226,7 +222,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Function  : public Term
+    class Function final : public Term
     {
     public:
         explicit Function (const String& name)  : functionName (name) {}
@@ -238,7 +234,7 @@ struct Expression::Helpers
         Type getType() const noexcept   { return functionType; }
         Term* clone() const             { return new Function (functionName, parameters); }
         int getNumInputs() const        { return parameters.size(); }
-        Term* getInput (int i) const    { return parameters.getReference(i).term.get(); }
+        Term* getInput (int i) const    { return parameters.getReference (i).term.get(); }
         String getName() const          { return functionName; }
 
         TermPtr resolve (const Scope& scope, int recursionDepth)
@@ -252,7 +248,7 @@ struct Expression::Helpers
                 HeapBlock<double> params (numParams);
 
                 for (int i = 0; i < numParams; ++i)
-                    params[i] = parameters.getReference(i).term->resolve (scope, recursionDepth + 1)->toDouble();
+                    params[i] = parameters.getReference (i).term->resolve (scope, recursionDepth + 1)->toDouble();
 
                 result = scope.evaluateFunction (functionName, params, numParams);
             }
@@ -267,7 +263,7 @@ struct Expression::Helpers
         int getInputIndexFor (const Term* possibleInput) const
         {
             for (int i = 0; i < parameters.size(); ++i)
-                if (parameters.getReference(i).term == possibleInput)
+                if (parameters.getReference (i).term == possibleInput)
                     return i;
 
             return -1;
@@ -282,7 +278,7 @@ struct Expression::Helpers
 
             for (int i = 0; i < parameters.size(); ++i)
             {
-                s << parameters.getReference(i).term->toString();
+                s << parameters.getReference (i).term->toString();
 
                 if (i < parameters.size() - 1)
                     s << ", ";
@@ -297,7 +293,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class DotOperator  : public BinaryTerm
+    class DotOperator final : public BinaryTerm
     {
     public:
         DotOperator (SymbolTerm* l, TermPtr r)  : BinaryTerm (TermPtr (l), r) {}
@@ -347,7 +343,7 @@ struct Expression::Helpers
 
     private:
         //==============================================================================
-        class EvaluationVisitor  : public Scope::Visitor
+        class EvaluationVisitor final : public Scope::Visitor
         {
         public:
             EvaluationVisitor (const TermPtr& t, const int recursion)
@@ -363,7 +359,7 @@ struct Expression::Helpers
             JUCE_DECLARE_NON_COPYABLE (EvaluationVisitor)
         };
 
-        class SymbolVisitingVisitor  : public Scope::Visitor
+        class SymbolVisitingVisitor final : public Scope::Visitor
         {
         public:
             SymbolVisitingVisitor (const TermPtr& t, SymbolVisitor& v, const int recursion)
@@ -379,7 +375,7 @@ struct Expression::Helpers
             JUCE_DECLARE_NON_COPYABLE (SymbolVisitingVisitor)
         };
 
-        class SymbolRenamingVisitor   : public Scope::Visitor
+        class SymbolRenamingVisitor final : public Scope::Visitor
         {
         public:
             SymbolRenamingVisitor (const TermPtr& t, const Expression::Symbol& symbol_, const String& newName_, const int recursionCount_)
@@ -402,7 +398,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Negate  : public Term
+    class Negate final : public Term
     {
     public:
         explicit Negate (const TermPtr& t) : input (t)
@@ -447,7 +443,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Add  : public BinaryTerm
+    class Add final : public BinaryTerm
     {
     public:
         Add (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
@@ -471,7 +467,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Subtract  : public BinaryTerm
+    class Subtract final : public BinaryTerm
     {
     public:
         Subtract (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
@@ -500,7 +496,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Multiply  : public BinaryTerm
+    class Multiply final : public BinaryTerm
     {
     public:
         Multiply (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
@@ -523,7 +519,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Divide  : public BinaryTerm
+    class Divide final : public BinaryTerm
     {
     public:
         Divide (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
@@ -621,7 +617,7 @@ struct Expression::Helpers
     }
 
     //==============================================================================
-    class SymbolCheckVisitor  : public Term::SymbolVisitor
+    class SymbolCheckVisitor final : public Term::SymbolVisitor
     {
     public:
         SymbolCheckVisitor (const Symbol& s) : symbol (s) {}
@@ -636,7 +632,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class SymbolListVisitor  : public Term::SymbolVisitor
+    class SymbolListVisitor final : public Term::SymbolVisitor
     {
     public:
         SymbolListVisitor (Array<Symbol>& list_) : list (list_) {}

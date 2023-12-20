@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -30,7 +23,7 @@
 constexpr const char* scanModeKey = "pluginScanMode";
 
 //==============================================================================
-class Superprocess  : private ChildProcessCoordinator
+class Superprocess final : private ChildProcessCoordinator
 {
 public:
     Superprocess()
@@ -94,8 +87,8 @@ private:
 };
 
 //==============================================================================
-class CustomPluginScanner  : public KnownPluginList::CustomScanner,
-                             private ChangeListener
+class CustomPluginScanner final : public KnownPluginList::CustomScanner,
+                                  private ChangeListener
 {
 public:
     CustomPluginScanner()
@@ -103,7 +96,7 @@ public:
         if (auto* file = getAppProperties().getUserSettings())
             file->addChangeListener (this);
 
-        changeListenerCallback (nullptr);
+        handleChange();
     }
 
     ~CustomPluginScanner() override
@@ -183,10 +176,15 @@ private:
         }
     }
 
-    void changeListenerCallback (ChangeBroadcaster*) override
+    void handleChange()
     {
         if (auto* file = getAppProperties().getUserSettings())
             scanInProcess = (file->getIntValue (scanModeKey) == 0);
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        handleChange();
     }
 
     std::unique_ptr<Superprocess> superprocess;
@@ -197,7 +195,7 @@ private:
 };
 
 //==============================================================================
-class CustomPluginListComponent  : public PluginListComponent
+class CustomPluginListComponent final : public PluginListComponent
 {
 public:
     CustomPluginListComponent (AudioPluginFormatManager& manager,
@@ -226,10 +224,16 @@ public:
             getAppProperties().getUserSettings()->setValue (scanModeKey, validationModeBox.getSelectedItemIndex());
         };
 
-        resized();
+        handleResize();
     }
 
     void resized() override
+    {
+        handleResize();
+    }
+
+private:
+    void handleResize()
     {
         PluginListComponent::resized();
 
@@ -237,7 +241,7 @@ public:
         validationModeBox.setBounds (buttonBounds.withWidth (130).withRightX (getWidth() - buttonBounds.getX()));
     }
 
-private:
+
     Label validationModeLabel { {}, "Scan mode" };
     ComboBox validationModeBox;
 
@@ -245,7 +249,7 @@ private:
 };
 
 //==============================================================================
-class MainHostWindow::PluginListWindow  : public DocumentWindow
+class MainHostWindow::PluginListWindow final : public DocumentWindow
 {
 public:
     PluginListWindow (MainHostWindow& mw, AudioPluginFormatManager& pluginFormatManager)
@@ -386,7 +390,7 @@ void MainHostWindow::closeButtonPressed()
     tryToQuitApplication();
 }
 
-struct AsyncQuitRetrier  : private Timer
+struct AsyncQuitRetrier final : private Timer
 {
     AsyncQuitRetrier()   { startTimer (500); }
 
@@ -748,7 +752,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
    #if ! (JUCE_IOS || JUCE_ANDROID)
     case CommandIDs::newFile:
         result.setInfo ("New", "Creates a new filter graph file", category, 0);
-        result.defaultKeypresses.add(KeyPress('n', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('n', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::open:
@@ -991,7 +995,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
             auto pos = graphHolder->getLocalPoint (this, Point<int> (x, y));
 
             for (int i = 0; i < jmin (5, typesFound.size()); ++i)
-                if (auto* desc = typesFound.getUnchecked(i))
+                if (auto* desc = typesFound.getUnchecked (i))
                     createPlugin (PluginDescriptionAndPreference { *desc }, pos);
         }
     }

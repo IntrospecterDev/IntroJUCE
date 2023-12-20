@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -49,7 +42,7 @@ public:
 
 private:
     //==============================================================================
-    class API_AVAILABLE (macos (10.10)) AccessibilityElement  : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
+    class API_AVAILABLE (macos (10.10)) AccessibilityElement final : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
     {
     public:
         static Holder create (AccessibilityHandler& handler)
@@ -269,10 +262,18 @@ private:
             {
                 if (auto* handler = getHandler (self))
                 {
-                    if (handler->getCurrentState().isCheckable())
-                        return juceStringToNS (handler->getCurrentState().isChecked() ? TRANS ("On") : TRANS ("Off"));
+                    if (! handler->getCurrentState().isCheckable())
+                        return getAccessibilityValueFromInterfaces (*handler);
 
-                    return getAccessibilityValueFromInterfaces (*handler);
+                    const auto checked = handler->getCurrentState().isChecked();
+
+                    if (   handler->getRole() == AccessibilityRole::toggleButton
+                        || handler->getRole() == AccessibilityRole::radioButton)
+                    {
+                        return checked ? @YES : @NO;
+                    }
+
+                    return juceStringToNS (checked ? TRANS ("On") : TRANS ("Off"));
                 }
 
                 return nil;
@@ -784,8 +785,18 @@ private:
                 for (auto* childHandler : children)
                     [accessibleChildren addObject: static_cast<id> (childHandler->getNativeImplementation())];
 
-                if (auto* nativeChild = AccessibilityHandler::getNativeChildForComponent (handler->getComponent()))
-                    [accessibleChildren addObject: static_cast<id> (nativeChild)];
+                if (id nativeChild = static_cast<id> (AccessibilityHandler::getNativeChildForComponent (handler->getComponent())))
+                {
+                    // Having both native and non-native children would require implementing an
+                    // ordering. However, this situation doesn't occur with any of our current
+                    // use-cases.
+                    jassert ([accessibleChildren count] == 0);
+
+                    if ([nativeChild isAccessibilityElement])
+                        [accessibleChildren addObject:nativeChild];
+                    else if (auto* childrenOfChild = [nativeChild accessibilityChildren]; childrenOfChild != nil)
+                        [accessibleChildren addObjectsFromArray:(NSArray* _Nonnull) childrenOfChild];
+                }
 
                 return accessibleChildren;
             }

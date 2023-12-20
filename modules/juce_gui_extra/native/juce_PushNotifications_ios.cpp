@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -57,7 +50,7 @@ struct PushNotificationsDelegateDetails
         action.title          = juceStringToNS (a.title);
         action.behavior       = a.style == Action::text ? UIUserNotificationActionBehaviorTextInput
                                                         : UIUserNotificationActionBehaviorDefault;
-        action.parameters     = varObjectToNSDictionary (a.parameters);
+        action.parameters     = varToNSDictionary (a.parameters);
         action.activationMode = a.triggerInBackground ? UIUserNotificationActivationModeBackground
                                                       : UIUserNotificationActivationModeForeground;
         action.destructive    = (bool) a.destructive;
@@ -119,8 +112,8 @@ struct PushNotificationsDelegateDetails
         notification.applicationIconBadgeNumber = n.badgeNumber;
 
         auto triggerTime = Time::getCurrentTime() + RelativeTime (n.triggerIntervalSec);
-        notification.fireDate   = [NSDate dateWithTimeIntervalSince1970: triggerTime.toMilliseconds() / 1000.];
-        notification.userInfo   = varObjectToNSDictionary (n.properties);
+        notification.fireDate   = [NSDate dateWithTimeIntervalSince1970: (double) triggerTime.toMilliseconds() / 1000.0];
+        notification.userInfo   = varToNSDictionary (n.properties);
 
         auto soundToPlayString = n.soundToPlay.toString (true);
 
@@ -152,7 +145,7 @@ struct PushNotificationsDelegateDetails
         else if (soundToPlayString.isNotEmpty())
             content.sound = [UNNotificationSound soundNamed: juceStringToNS (soundToPlayString)];
 
-        auto* propsDict = (NSMutableDictionary*) varObjectToNSDictionary (n.properties);
+        auto* propsDict = (NSMutableDictionary*) varToNSDictionary (n.properties);
         [propsDict setObject: juceStringToNS (soundToPlayString) forKey: nsStringLiteral ("com.juce.soundName")];
         content.userInfo = propsDict;
 
@@ -825,7 +818,7 @@ private:
     }
 
     //==============================================================================
-    struct Class    : public ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>>
+    struct Class final : public ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>>
     {
         Class()
             : ObjCClass ("JucePushNotificationsDelegate_")

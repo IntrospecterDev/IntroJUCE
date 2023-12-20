@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -212,30 +208,25 @@ DECLARE_JNI_CLASS (AndroidMulticastLock, "android/net/wifi/WifiManager$Multicast
 DECLARE_JNI_CLASS (AndroidWifiManager, "android/net/wifi/WifiManager")
 #undef JNI_CLASS_MEMBERS
 
-static LocalRef<jobject> getMulticastLock()
+static jobject getMulticastLock()
 {
-    static LocalRef<jobject> multicastLock;
-    static bool hasChecked = false;
-
-    if (! hasChecked)
+    static GlobalRef multicastLock = [&]
     {
-        hasChecked = true;
-
         auto* env = getEnv();
 
         LocalRef<jobject> wifiManager (env->CallObjectMethod (getAppContext().get(),
                                                               AndroidContext.getSystemService,
                                                               javaString ("wifi").get()));
 
-        if (wifiManager != nullptr)
-        {
-            multicastLock = LocalRef<jobject> (env->CallObjectMethod (wifiManager.get(),
-                                                                      AndroidWifiManager.createMulticastLock,
-                                                                      javaString ("JUCE_MulticastLock").get()));
-        }
-    }
+        if (wifiManager == nullptr)
+            return GlobalRef{};
 
-    return multicastLock;
+        return GlobalRef (LocalRef<jobject> (env->CallObjectMethod (wifiManager.get(),
+                                                                    AndroidWifiManager.createMulticastLock,
+                                                                    javaString ("JUCE_MulticastLock").get())));
+    }();
+
+    return multicastLock.get();
 }
 
 JUCE_API void JUCE_CALLTYPE acquireMulticastLock();
@@ -244,7 +235,7 @@ JUCE_API void JUCE_CALLTYPE acquireMulticastLock()
     auto multicastLock = getMulticastLock();
 
     if (multicastLock != nullptr)
-        getEnv()->CallVoidMethod (multicastLock.get(), AndroidMulticastLock.acquire);
+        getEnv()->CallVoidMethod (multicastLock, AndroidMulticastLock.acquire);
 }
 
 JUCE_API void JUCE_CALLTYPE releaseMulticastLock();
@@ -253,7 +244,7 @@ JUCE_API void JUCE_CALLTYPE releaseMulticastLock()
     auto multicastLock = getMulticastLock();
 
     if (multicastLock != nullptr)
-        getEnv()->CallVoidMethod (multicastLock.get(), AndroidMulticastLock.release);
+        getEnv()->CallVoidMethod (multicastLock, AndroidMulticastLock.release);
 }
 
 //==============================================================================

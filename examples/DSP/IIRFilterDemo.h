@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -96,13 +96,13 @@ struct IIRFilterDemoDSP
 
     ChoiceParameter typeParam { { "Low-pass", "High-pass", "Band-pass" }, 1, "Type" };
     SliderParameter cutoffParam { { 20.0, 20000.0 }, 0.5, 440.0f, "Cutoff", "Hz" };
-    SliderParameter qParam { { 0.3, 20.0 }, 0.5, 1.0 / std::sqrt(2.0), "Q" };
+    SliderParameter qParam { { 0.3, 20.0 }, 0.5, 1.0 / std::sqrt (2.0), "Q" };
 
     std::vector<DSPDemoParameterBase*> parameters { &typeParam, &cutoffParam, &qParam };
     double sampleRate = 0.0;
 };
 
-struct IIRFilterDemo    : public Component
+struct IIRFilterDemo final : public Component
 {
     IIRFilterDemo()
     {

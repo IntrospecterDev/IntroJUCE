@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -40,17 +33,17 @@ namespace PushNotificationsDelegateDetailsOsx
         notification.title           = juceStringToNS (n.title);
         notification.subtitle        = juceStringToNS (n.subtitle);
         notification.informativeText = juceStringToNS (n.body);
-        notification.userInfo = varObjectToNSDictionary (n.properties);
+        notification.userInfo = varToNSDictionary (n.properties);
 
         auto triggerTime = Time::getCurrentTime() + RelativeTime (n.triggerIntervalSec);
-        notification.deliveryDate = [NSDate dateWithTimeIntervalSince1970: triggerTime.toMilliseconds() / 1000.];
+        notification.deliveryDate = [NSDate dateWithTimeIntervalSince1970: (double) triggerTime.toMilliseconds() / 1000.0];
 
         if (n.repeat && n.triggerIntervalSec >= 60)
         {
             auto dateComponents = [[NSDateComponents alloc] init];
             auto intervalSec = NSInteger (n.triggerIntervalSec);
             dateComponents.second = intervalSec;
-            dateComponents.nanosecond = NSInteger ((n.triggerIntervalSec - intervalSec) * 1000000000);
+            dateComponents.nanosecond = NSInteger ((n.triggerIntervalSec - (double) intervalSec) * 1000000000);
 
             notification.deliveryRepeatInterval = dateComponents;
 
@@ -143,7 +136,7 @@ namespace PushNotificationsDelegateDetailsOsx
 
         if (n.deliveryRepeatInterval != nil)
         {
-            notif.triggerIntervalSec = n.deliveryRepeatInterval.second + (n.deliveryRepeatInterval.nanosecond / 1000000000.);
+            notif.triggerIntervalSec = (double) n.deliveryRepeatInterval.second + ((double) n.deliveryRepeatInterval.nanosecond / 1000000000.0);
         }
         else
         {
@@ -297,7 +290,7 @@ protected:
     NSUniquePtr<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>> delegate;
 
 private:
-    struct Class    : public ObjCClass<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>>
+    struct Class final : public ObjCClass<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>>
     {
         Class() : ObjCClass<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>> ("JucePushNotificationsDelegate_")
         {

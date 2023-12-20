@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -169,7 +165,7 @@ public:
                 error << "The device \"" << deviceID << "\" is not available.";
             else
                 error << "Could not open " << (forInput ? "input" : "output") << " device \"" << deviceID
-                      << "\": " << snd_strerror(err) << " (" << err << ")";
+                      << "\": " << snd_strerror (err) << " (" << err << ")";
 
             JUCE_ALSA_LOG ("snd_pcm_open failed; " << error);
         }
@@ -481,7 +477,7 @@ private:
 };
 
 //==============================================================================
-class ALSAThread  : public Thread
+class ALSAThread final : public Thread
 {
 public:
     ALSAThread (const String& inputDeviceID, const String& outputDeviceID)
@@ -838,7 +834,7 @@ private:
 
 
 //==============================================================================
-class ALSAAudioIODevice   : public AudioIODevice
+class ALSAAudioIODevice final : public AudioIODevice
 {
 public:
     ALSAAudioIODevice (const String& deviceName,
@@ -967,7 +963,7 @@ private:
 
 
 //==============================================================================
-class ALSAAudioIODeviceType  : public AudioIODeviceType
+class ALSAAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     ALSAAudioIODeviceType (bool onlySoundcards, const String& deviceTypeName)

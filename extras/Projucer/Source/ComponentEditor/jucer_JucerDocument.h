@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -83,7 +76,7 @@ public:
     String getVariableInitialisers() const                                  { return variableInitialisers; }
     void setVariableInitialisers (const String& newInitlialisers);
 
-    void setFixedSize (const bool isFixed);
+    void setFixedSize (bool isFixed);
     bool isFixedSize() const noexcept                                       { return fixedSize; }
 
     void setInitialSize (int w, int h);
@@ -94,9 +87,9 @@ public:
     //==============================================================================
     virtual int getNumPaintRoutines() const = 0;
     virtual StringArray getPaintRoutineNames() const = 0;
-    virtual PaintRoutine* getPaintRoutine (const int index) const = 0;
+    virtual PaintRoutine* getPaintRoutine (int index) const = 0;
     virtual ComponentLayout* getComponentLayout() const = 0;
-    virtual Component* createTestComponent (const bool alwaysFillBackground) = 0;
+    virtual Component* createTestComponent (bool alwaysFillBackground) = 0;
     virtual void addExtraClassProperties (PropertyPanel&);
 
     //==============================================================================
@@ -105,23 +98,23 @@ public:
                                      StringArray& methods,
                                      StringArray& initialContents) const;
 
-    void setOptionalMethodEnabled (const String& methodSignature, const bool enable);
+    void setOptionalMethodEnabled (const String& methodSignature, bool enable);
     bool isOptionalMethodEnabled (const String& methodSignature) const noexcept;
 
     //==============================================================================
     BinaryResources& getResources() noexcept                                { return resources; }
 
     //==============================================================================
-    void setSnappingGrid (const int numPixels, const bool active, const bool shown);
+    void setSnappingGrid (int numPixels, bool active, const bool shown);
 
     int getSnappingGridSize() const noexcept                                { return snapGridPixels; }
-    bool isSnapActive (const bool disableIfCtrlKeyDown) const noexcept;
+    bool isSnapActive (bool disableIfCtrlKeyDown) const noexcept;
     bool isSnapShown() const noexcept                                       { return snapShown; }
 
     int snapPosition (int pos) const noexcept;
 
     //==============================================================================
-    void setComponentOverlayOpacity (const float alpha);
+    void setComponentOverlayOpacity (float alpha);
     float getComponentOverlayOpacity() const noexcept                       { return componentOverlayOpacity; }
 
     //==============================================================================

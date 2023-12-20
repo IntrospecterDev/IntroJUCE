@@ -1,19 +1,12 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE library.
-#  Copyright (c) 2022 - Raw Material Software Limited
+#  This file is part of the JUCE 8 technical preview.
+#  Copyright (c) Raw Material Software Limited
 #
-#  JUCE is an open source library subject to commercial or open-source
-#  licensing.
+#  You may use this code under the terms of the GPL v3
+#  (see www.gnu.org/licenses).
 #
-#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-#  Agreement and JUCE Privacy Policy.
-#
-#  End User License Agreement: www.juce.com/juce-7-licence
-#  Privacy Policy: www.juce.com/juce-privacy-policy
-#
-#  Or: You may also use this code under the terms of the GPL v3 (see
-#  www.gnu.org/licenses).
+#  For the technical preview this file cannot be licensed commercially.
 #
 #  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
 #  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -609,7 +602,7 @@ function(juce_add_module module_path)
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" linuxLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
-            if(module_name STREQUAL "juce_gui_basics")
+            if(module_name MATCHES "juce_gui_basics|juce_audio_processors|juce_core")
                 target_compile_options(${module_name} INTERFACE /bigobj)
             endif()
 

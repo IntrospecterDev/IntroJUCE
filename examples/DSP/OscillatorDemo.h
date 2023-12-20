@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -134,7 +134,7 @@ struct OscillatorDemoDSP
     std::vector<DSPDemoParameterBase*> parameters { &typeParam, &accuracy, &freqParam, &gainParam, &mixParam };
 };
 
-struct OscillatorDemo    : public Component
+struct OscillatorDemo final : public Component
 {
     OscillatorDemo()
     {

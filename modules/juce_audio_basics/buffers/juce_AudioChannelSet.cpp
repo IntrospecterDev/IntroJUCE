@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -46,105 +42,105 @@ String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
 
     switch (type)
     {
-        case left:                return NEEDS_TRANS("Left");
-        case right:               return NEEDS_TRANS("Right");
-        case centre:              return NEEDS_TRANS("Centre");
-        case LFE:                 return NEEDS_TRANS("LFE");
-        case leftSurround:        return NEEDS_TRANS("Left Surround");
-        case rightSurround:       return NEEDS_TRANS("Right Surround");
-        case leftCentre:          return NEEDS_TRANS("Left Centre");
-        case rightCentre:         return NEEDS_TRANS("Right Centre");
-        case centreSurround:      return NEEDS_TRANS("Centre Surround");
-        case leftSurroundRear:    return NEEDS_TRANS("Left Surround Rear");
-        case rightSurroundRear:   return NEEDS_TRANS("Right Surround Rear");
-        case topMiddle:           return NEEDS_TRANS("Top Middle");
-        case topFrontLeft:        return NEEDS_TRANS("Top Front Left");
-        case topFrontCentre:      return NEEDS_TRANS("Top Front Centre");
-        case topFrontRight:       return NEEDS_TRANS("Top Front Right");
-        case topRearLeft:         return NEEDS_TRANS("Top Rear Left");
-        case topRearCentre:       return NEEDS_TRANS("Top Rear Centre");
-        case topRearRight:        return NEEDS_TRANS("Top Rear Right");
-        case wideLeft:            return NEEDS_TRANS("Wide Left");
-        case wideRight:           return NEEDS_TRANS("Wide Right");
-        case LFE2:                return NEEDS_TRANS("LFE 2");
-        case leftSurroundSide:    return NEEDS_TRANS("Left Surround Side");
-        case rightSurroundSide:   return NEEDS_TRANS("Right Surround Side");
-        case ambisonicW:          return NEEDS_TRANS("Ambisonic W");
-        case ambisonicX:          return NEEDS_TRANS("Ambisonic X");
-        case ambisonicY:          return NEEDS_TRANS("Ambisonic Y");
-        case ambisonicZ:          return NEEDS_TRANS("Ambisonic Z");
-        case topSideLeft:         return NEEDS_TRANS("Top Side Left");
-        case topSideRight:        return NEEDS_TRANS("Top Side Right");
-        case ambisonicACN4:       return NEEDS_TRANS("Ambisonic 4");
-        case ambisonicACN5:       return NEEDS_TRANS("Ambisonic 5");
-        case ambisonicACN6:       return NEEDS_TRANS("Ambisonic 6");
-        case ambisonicACN7:       return NEEDS_TRANS("Ambisonic 7");
-        case ambisonicACN8:       return NEEDS_TRANS("Ambisonic 8");
-        case ambisonicACN9:       return NEEDS_TRANS("Ambisonic 9");
-        case ambisonicACN10:      return NEEDS_TRANS("Ambisonic 10");
-        case ambisonicACN11:      return NEEDS_TRANS("Ambisonic 11");
-        case ambisonicACN12:      return NEEDS_TRANS("Ambisonic 12");
-        case ambisonicACN13:      return NEEDS_TRANS("Ambisonic 13");
-        case ambisonicACN14:      return NEEDS_TRANS("Ambisonic 14");
-        case ambisonicACN15:      return NEEDS_TRANS("Ambisonic 15");
-        case ambisonicACN16:      return NEEDS_TRANS("Ambisonic 16");
-        case ambisonicACN17:      return NEEDS_TRANS("Ambisonic 17");
-        case ambisonicACN18:      return NEEDS_TRANS("Ambisonic 18");
-        case ambisonicACN19:      return NEEDS_TRANS("Ambisonic 19");
-        case ambisonicACN20:      return NEEDS_TRANS("Ambisonic 20");
-        case ambisonicACN21:      return NEEDS_TRANS("Ambisonic 21");
-        case ambisonicACN22:      return NEEDS_TRANS("Ambisonic 22");
-        case ambisonicACN23:      return NEEDS_TRANS("Ambisonic 23");
-        case ambisonicACN24:      return NEEDS_TRANS("Ambisonic 24");
-        case ambisonicACN25:      return NEEDS_TRANS("Ambisonic 25");
-        case ambisonicACN26:      return NEEDS_TRANS("Ambisonic 26");
-        case ambisonicACN27:      return NEEDS_TRANS("Ambisonic 27");
-        case ambisonicACN28:      return NEEDS_TRANS("Ambisonic 28");
-        case ambisonicACN29:      return NEEDS_TRANS("Ambisonic 29");
-        case ambisonicACN30:      return NEEDS_TRANS("Ambisonic 30");
-        case ambisonicACN31:      return NEEDS_TRANS("Ambisonic 31");
-        case ambisonicACN32:      return NEEDS_TRANS("Ambisonic 32");
-        case ambisonicACN33:      return NEEDS_TRANS("Ambisonic 33");
-        case ambisonicACN34:      return NEEDS_TRANS("Ambisonic 34");
-        case ambisonicACN35:      return NEEDS_TRANS("Ambisonic 35");
-        case ambisonicACN36:      return NEEDS_TRANS("Ambisonic 36");
-        case ambisonicACN37:      return NEEDS_TRANS("Ambisonic 37");
-        case ambisonicACN38:      return NEEDS_TRANS("Ambisonic 38");
-        case ambisonicACN39:      return NEEDS_TRANS("Ambisonic 39");
-        case ambisonicACN40:      return NEEDS_TRANS("Ambisonic 40");
-        case ambisonicACN41:      return NEEDS_TRANS("Ambisonic 41");
-        case ambisonicACN42:      return NEEDS_TRANS("Ambisonic 42");
-        case ambisonicACN43:      return NEEDS_TRANS("Ambisonic 43");
-        case ambisonicACN44:      return NEEDS_TRANS("Ambisonic 44");
-        case ambisonicACN45:      return NEEDS_TRANS("Ambisonic 45");
-        case ambisonicACN46:      return NEEDS_TRANS("Ambisonic 46");
-        case ambisonicACN47:      return NEEDS_TRANS("Ambisonic 47");
-        case ambisonicACN48:      return NEEDS_TRANS("Ambisonic 48");
-        case ambisonicACN49:      return NEEDS_TRANS("Ambisonic 49");
-        case ambisonicACN50:      return NEEDS_TRANS("Ambisonic 50");
-        case ambisonicACN51:      return NEEDS_TRANS("Ambisonic 51");
-        case ambisonicACN52:      return NEEDS_TRANS("Ambisonic 52");
-        case ambisonicACN53:      return NEEDS_TRANS("Ambisonic 53");
-        case ambisonicACN54:      return NEEDS_TRANS("Ambisonic 54");
-        case ambisonicACN55:      return NEEDS_TRANS("Ambisonic 55");
-        case ambisonicACN56:      return NEEDS_TRANS("Ambisonic 56");
-        case ambisonicACN57:      return NEEDS_TRANS("Ambisonic 57");
-        case ambisonicACN58:      return NEEDS_TRANS("Ambisonic 58");
-        case ambisonicACN59:      return NEEDS_TRANS("Ambisonic 59");
-        case ambisonicACN60:      return NEEDS_TRANS("Ambisonic 60");
-        case ambisonicACN61:      return NEEDS_TRANS("Ambisonic 61");
-        case ambisonicACN62:      return NEEDS_TRANS("Ambisonic 62");
-        case ambisonicACN63:      return NEEDS_TRANS("Ambisonic 63");
-        case bottomFrontLeft:     return NEEDS_TRANS("Bottom Front Left");
-        case bottomFrontCentre:   return NEEDS_TRANS("Bottom Front Centre");
-        case bottomFrontRight:    return NEEDS_TRANS("Bottom Front Right");
-        case proximityLeft:       return NEEDS_TRANS("Proximity Left");
-        case proximityRight:      return NEEDS_TRANS("Proximity Right");
-        case bottomSideLeft:      return NEEDS_TRANS("Bottom Side Left");
-        case bottomSideRight:     return NEEDS_TRANS("Bottom Side Right");
-        case bottomRearLeft:      return NEEDS_TRANS("Bottom Rear Left");
-        case bottomRearCentre:    return NEEDS_TRANS("Bottom Rear Centre");
-        case bottomRearRight:     return NEEDS_TRANS("Bottom Rear Right");
+        case left:                return NEEDS_TRANS ("Left");
+        case right:               return NEEDS_TRANS ("Right");
+        case centre:              return NEEDS_TRANS ("Centre");
+        case LFE:                 return NEEDS_TRANS ("LFE");
+        case leftSurround:        return NEEDS_TRANS ("Left Surround");
+        case rightSurround:       return NEEDS_TRANS ("Right Surround");
+        case leftCentre:          return NEEDS_TRANS ("Left Centre");
+        case rightCentre:         return NEEDS_TRANS ("Right Centre");
+        case centreSurround:      return NEEDS_TRANS ("Centre Surround");
+        case leftSurroundRear:    return NEEDS_TRANS ("Left Surround Rear");
+        case rightSurroundRear:   return NEEDS_TRANS ("Right Surround Rear");
+        case topMiddle:           return NEEDS_TRANS ("Top Middle");
+        case topFrontLeft:        return NEEDS_TRANS ("Top Front Left");
+        case topFrontCentre:      return NEEDS_TRANS ("Top Front Centre");
+        case topFrontRight:       return NEEDS_TRANS ("Top Front Right");
+        case topRearLeft:         return NEEDS_TRANS ("Top Rear Left");
+        case topRearCentre:       return NEEDS_TRANS ("Top Rear Centre");
+        case topRearRight:        return NEEDS_TRANS ("Top Rear Right");
+        case wideLeft:            return NEEDS_TRANS ("Wide Left");
+        case wideRight:           return NEEDS_TRANS ("Wide Right");
+        case LFE2:                return NEEDS_TRANS ("LFE 2");
+        case leftSurroundSide:    return NEEDS_TRANS ("Left Surround Side");
+        case rightSurroundSide:   return NEEDS_TRANS ("Right Surround Side");
+        case ambisonicW:          return NEEDS_TRANS ("Ambisonic W");
+        case ambisonicX:          return NEEDS_TRANS ("Ambisonic X");
+        case ambisonicY:          return NEEDS_TRANS ("Ambisonic Y");
+        case ambisonicZ:          return NEEDS_TRANS ("Ambisonic Z");
+        case topSideLeft:         return NEEDS_TRANS ("Top Side Left");
+        case topSideRight:        return NEEDS_TRANS ("Top Side Right");
+        case ambisonicACN4:       return NEEDS_TRANS ("Ambisonic 4");
+        case ambisonicACN5:       return NEEDS_TRANS ("Ambisonic 5");
+        case ambisonicACN6:       return NEEDS_TRANS ("Ambisonic 6");
+        case ambisonicACN7:       return NEEDS_TRANS ("Ambisonic 7");
+        case ambisonicACN8:       return NEEDS_TRANS ("Ambisonic 8");
+        case ambisonicACN9:       return NEEDS_TRANS ("Ambisonic 9");
+        case ambisonicACN10:      return NEEDS_TRANS ("Ambisonic 10");
+        case ambisonicACN11:      return NEEDS_TRANS ("Ambisonic 11");
+        case ambisonicACN12:      return NEEDS_TRANS ("Ambisonic 12");
+        case ambisonicACN13:      return NEEDS_TRANS ("Ambisonic 13");
+        case ambisonicACN14:      return NEEDS_TRANS ("Ambisonic 14");
+        case ambisonicACN15:      return NEEDS_TRANS ("Ambisonic 15");
+        case ambisonicACN16:      return NEEDS_TRANS ("Ambisonic 16");
+        case ambisonicACN17:      return NEEDS_TRANS ("Ambisonic 17");
+        case ambisonicACN18:      return NEEDS_TRANS ("Ambisonic 18");
+        case ambisonicACN19:      return NEEDS_TRANS ("Ambisonic 19");
+        case ambisonicACN20:      return NEEDS_TRANS ("Ambisonic 20");
+        case ambisonicACN21:      return NEEDS_TRANS ("Ambisonic 21");
+        case ambisonicACN22:      return NEEDS_TRANS ("Ambisonic 22");
+        case ambisonicACN23:      return NEEDS_TRANS ("Ambisonic 23");
+        case ambisonicACN24:      return NEEDS_TRANS ("Ambisonic 24");
+        case ambisonicACN25:      return NEEDS_TRANS ("Ambisonic 25");
+        case ambisonicACN26:      return NEEDS_TRANS ("Ambisonic 26");
+        case ambisonicACN27:      return NEEDS_TRANS ("Ambisonic 27");
+        case ambisonicACN28:      return NEEDS_TRANS ("Ambisonic 28");
+        case ambisonicACN29:      return NEEDS_TRANS ("Ambisonic 29");
+        case ambisonicACN30:      return NEEDS_TRANS ("Ambisonic 30");
+        case ambisonicACN31:      return NEEDS_TRANS ("Ambisonic 31");
+        case ambisonicACN32:      return NEEDS_TRANS ("Ambisonic 32");
+        case ambisonicACN33:      return NEEDS_TRANS ("Ambisonic 33");
+        case ambisonicACN34:      return NEEDS_TRANS ("Ambisonic 34");
+        case ambisonicACN35:      return NEEDS_TRANS ("Ambisonic 35");
+        case ambisonicACN36:      return NEEDS_TRANS ("Ambisonic 36");
+        case ambisonicACN37:      return NEEDS_TRANS ("Ambisonic 37");
+        case ambisonicACN38:      return NEEDS_TRANS ("Ambisonic 38");
+        case ambisonicACN39:      return NEEDS_TRANS ("Ambisonic 39");
+        case ambisonicACN40:      return NEEDS_TRANS ("Ambisonic 40");
+        case ambisonicACN41:      return NEEDS_TRANS ("Ambisonic 41");
+        case ambisonicACN42:      return NEEDS_TRANS ("Ambisonic 42");
+        case ambisonicACN43:      return NEEDS_TRANS ("Ambisonic 43");
+        case ambisonicACN44:      return NEEDS_TRANS ("Ambisonic 44");
+        case ambisonicACN45:      return NEEDS_TRANS ("Ambisonic 45");
+        case ambisonicACN46:      return NEEDS_TRANS ("Ambisonic 46");
+        case ambisonicACN47:      return NEEDS_TRANS ("Ambisonic 47");
+        case ambisonicACN48:      return NEEDS_TRANS ("Ambisonic 48");
+        case ambisonicACN49:      return NEEDS_TRANS ("Ambisonic 49");
+        case ambisonicACN50:      return NEEDS_TRANS ("Ambisonic 50");
+        case ambisonicACN51:      return NEEDS_TRANS ("Ambisonic 51");
+        case ambisonicACN52:      return NEEDS_TRANS ("Ambisonic 52");
+        case ambisonicACN53:      return NEEDS_TRANS ("Ambisonic 53");
+        case ambisonicACN54:      return NEEDS_TRANS ("Ambisonic 54");
+        case ambisonicACN55:      return NEEDS_TRANS ("Ambisonic 55");
+        case ambisonicACN56:      return NEEDS_TRANS ("Ambisonic 56");
+        case ambisonicACN57:      return NEEDS_TRANS ("Ambisonic 57");
+        case ambisonicACN58:      return NEEDS_TRANS ("Ambisonic 58");
+        case ambisonicACN59:      return NEEDS_TRANS ("Ambisonic 59");
+        case ambisonicACN60:      return NEEDS_TRANS ("Ambisonic 60");
+        case ambisonicACN61:      return NEEDS_TRANS ("Ambisonic 61");
+        case ambisonicACN62:      return NEEDS_TRANS ("Ambisonic 62");
+        case ambisonicACN63:      return NEEDS_TRANS ("Ambisonic 63");
+        case bottomFrontLeft:     return NEEDS_TRANS ("Bottom Front Left");
+        case bottomFrontCentre:   return NEEDS_TRANS ("Bottom Front Centre");
+        case bottomFrontRight:    return NEEDS_TRANS ("Bottom Front Right");
+        case proximityLeft:       return NEEDS_TRANS ("Proximity Left");
+        case proximityRight:      return NEEDS_TRANS ("Proximity Right");
+        case bottomSideLeft:      return NEEDS_TRANS ("Bottom Side Left");
+        case bottomSideRight:     return NEEDS_TRANS ("Bottom Side Right");
+        case bottomRearLeft:      return NEEDS_TRANS ("Bottom Rear Left");
+        case bottomRearCentre:    return NEEDS_TRANS ("Bottom Rear Centre");
+        case bottomRearRight:     return NEEDS_TRANS ("Bottom Rear Right");
         case discreteChannel0:
         case unknown:
         default:                  break;
@@ -487,7 +483,7 @@ int AudioChannelSet::size() const noexcept
 
 AudioChannelSet::ChannelType AudioChannelSet::getTypeOfChannel (int index) const noexcept
 {
-    int bit = channels.findNextSetBit(0);
+    int bit = channels.findNextSetBit (0);
 
     for (int i = 0; i < index && bit >= 0; ++i)
         bit = channels.findNextSetBit (bit + 1);
@@ -514,7 +510,7 @@ Array<AudioChannelSet::ChannelType> AudioChannelSet::getChannelTypes() const
 {
     Array<ChannelType> result;
 
-    for (int bit = channels.findNextSetBit(0); bit >= 0; bit = channels.findNextSetBit (bit + 1))
+    for (int bit = channels.findNextSetBit (0); bit >= 0; bit = channels.findNextSetBit (bit + 1))
         result.add (static_cast<ChannelType> (bit));
 
     return result;
@@ -750,7 +746,7 @@ int AudioChannelSet::getAmbisonicOrderForNumChannels (int numChannels, int maxOr
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AudioChannelSetUnitTest  : public UnitTest
+class AudioChannelSetUnitTest final : public UnitTest
 {
 public:
     AudioChannelSetUnitTest()

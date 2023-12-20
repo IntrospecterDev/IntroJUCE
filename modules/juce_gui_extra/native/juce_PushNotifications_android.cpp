@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -436,7 +429,7 @@ struct PushNotifications::Pimpl
     //==============================================================================
     String getDeviceToken() const
     {
-      #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
+      #if defined (JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
         auto* env = getEnv();
 
         auto instanceId = LocalRef<jobject> (env->CallStaticObjectMethod (FirebaseInstanceId, FirebaseInstanceId.getInstance));
@@ -449,7 +442,7 @@ struct PushNotifications::Pimpl
 
     void notifyListenersTokenRefreshed ([[maybe_unused]] const String& token)
     {
-      #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
+      #if defined (JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
         MessageManager::callAsync ([this, token]
         {
             owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (token); });
@@ -460,7 +453,7 @@ struct PushNotifications::Pimpl
     //==============================================================================
     void subscribeToTopic ([[maybe_unused]] const String& topic)
     {
-      #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+      #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         auto* env = getEnv();
 
         auto firebaseMessaging = LocalRef<jobject> (env->CallStaticObjectMethod (FirebaseMessaging,
@@ -472,7 +465,7 @@ struct PushNotifications::Pimpl
 
     void unsubscribeFromTopic ([[maybe_unused]] const String& topic)
     {
-      #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+      #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         auto* env = getEnv();
 
         auto firebaseMessaging = LocalRef<jobject> (env->CallStaticObjectMethod (FirebaseMessaging,
@@ -489,7 +482,7 @@ struct PushNotifications::Pimpl
                               [[maybe_unused]] int timeToLive,
                               [[maybe_unused]] const StringPairArray& additionalData)
     {
-      #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+      #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         auto* env = getEnv();
 
         auto messageBuilder = LocalRef<jobject> (env->NewObject (RemoteMessageBuilder,
@@ -520,7 +513,7 @@ struct PushNotifications::Pimpl
 
     void notifyListenersAboutRemoteNotificationFromSystemTray ([[maybe_unused]] const LocalRef<jobject>& intent)
     {
-      #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+      #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         auto* env = getEnv();
 
         auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
@@ -532,7 +525,7 @@ struct PushNotifications::Pimpl
 
     void notifyListenersAboutRemoteNotificationFromService ([[maybe_unused]] const LocalRef<jobject>& remoteNotification)
     {
-      #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+      #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         GlobalRef rn (remoteNotification);
 
         MessageManager::callAsync ([this, rn]
@@ -545,7 +538,7 @@ struct PushNotifications::Pimpl
 
     void notifyListenersAboutRemoteNotificationsDeleted()
     {
-      #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+      #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         MessageManager::callAsync ([this]
         {
             owner.listeners.call ([] (Listener& l) { l.remoteNotificationsDeleted(); });
@@ -555,8 +548,8 @@ struct PushNotifications::Pimpl
 
     void notifyListenersAboutUpstreamMessageSent ([[maybe_unused]] const LocalRef<jstring>& messageId)
     {
-      #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-        GlobalRef mid (LocalRef<jobject>(messageId.get()));
+      #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+        GlobalRef mid (LocalRef<jobject> (messageId.get()));
 
         MessageManager::callAsync ([this, mid]
         {
@@ -569,8 +562,8 @@ struct PushNotifications::Pimpl
     void notifyListenersAboutUpstreamMessageSendingError ([[maybe_unused]] const LocalRef<jstring>& messageId,
                                                           [[maybe_unused]] const LocalRef<jstring>& error)
     {
-      #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-        GlobalRef mid (LocalRef<jobject>(messageId.get())), e (LocalRef<jobject>(error.get()));
+      #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+        GlobalRef mid (LocalRef<jobject> (messageId.get())), e (LocalRef<jobject> (error.get()));
 
         MessageManager::callAsync ([this, mid, e]
         {
@@ -1077,7 +1070,7 @@ struct PushNotifications::Pimpl
 
         auto bundle = LocalRef<jobject> (env->NewObject (AndroidBundle, AndroidBundle.constructor));
         env->CallVoidMethod (bundle, AndroidBundle.putString, javaString ("properties").get(),
-                             javaString (JSON::toString (varToParse, false)).get());
+                             javaString (JSON::toString (varToParse)).get());
 
         return bundle;
     }
@@ -1301,7 +1294,7 @@ struct PushNotifications::Pimpl
         return {};
     }
 
-  #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+  #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
     static PushNotifications::Notification firebaseRemoteNotificationToJuceNotification (jobject remoteNotification)
     {
         auto* env = getEnv();
@@ -1533,7 +1526,7 @@ struct PushNotifications::Pimpl
     PushNotifications& owner;
 };
 
-#if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
+#if defined (JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
 //==============================================================================
 struct JuceFirebaseInstanceIdService
 {
@@ -1551,7 +1544,7 @@ struct JuceFirebaseInstanceIdService
 };
 #endif
 
-#if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+#if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
 //==============================================================================
 struct JuceFirebaseMessagingService
 {
@@ -1611,7 +1604,7 @@ bool juce_handleNotificationIntent (void* intent)
 
         return true;
     }
-  #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+  #if defined (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
     else if (PushNotifications::Pimpl::isRemoteNotificationIntent ((jobject) intent))
     {
         if (instance)

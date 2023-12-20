@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -189,7 +182,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     isIOSAppActive = false;
 
     for (int i = appBecomingInactiveCallbacks.size(); --i >= 0;)
-        appBecomingInactiveCallbacks.getReference(i)->appBecomingInactive();
+        appBecomingInactiveCallbacks.getReference (i)->appBecomingInactive();
 }
 
 - (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*)identifier
@@ -556,7 +549,7 @@ public:
     }
 
 private:
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass final : public ObjCClass<NSObject>
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
         {
@@ -599,24 +592,6 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return Orientations::convertToJuce (orientation);
 }
 
-template <typename Value>
-static BorderSize<Value> operator/ (BorderSize<Value> border, Value scale)
-{
-    return { border.getTop()    / scale,
-             border.getLeft()   / scale,
-             border.getBottom() / scale,
-             border.getRight()  / scale };
-}
-
-template <typename Value>
-static BorderSize<int> roundToInt (BorderSize<Value> border)
-{
-    return { roundToInt (border.getTop()),
-             roundToInt (border.getLeft()),
-             roundToInt (border.getBottom()),
-             roundToInt (border.getRight()) };
-}
-
 // The most straightforward way of retrieving the screen area available to an iOS app
 // seems to be to create a new window (which will take up all available space) and to
 // query its frame.
@@ -636,10 +611,10 @@ static BorderSize<int> getSafeAreaInsets (float masterScale)
     if (@available (iOS 11.0, *))
     {
         UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
-        return roundToInt (BorderSize<double> { safeInsets.top,
-                                                safeInsets.left,
-                                                safeInsets.bottom,
-                                                safeInsets.right } / (double) masterScale);
+        return detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
+                                                                          safeInsets.left,
+                                                                          safeInsets.bottom,
+                                                                          safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
     }
 
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
@@ -674,7 +649,7 @@ void Displays::findDisplays (float masterScale)
         auto getInsets() const { return insets; }
 
     private:
-        struct DelegateClass : public ObjCClass<NSObject>
+        struct DelegateClass final : public ObjCClass<NSObject>
         {
             DelegateClass() : ObjCClass<NSObject> ("JUCEOnScreenKeyboardObserver_")
             {
@@ -746,7 +721,8 @@ void Displays::findDisplays (float masterScale)
         d.totalArea = convertToRectInt ([s bounds]) / masterScale;
         d.userArea = getRecommendedWindowBounds() / masterScale;
         d.safeAreaInsets = getSafeAreaInsets (masterScale);
-        d.keyboardInsets = roundToInt (keyboardChangeDetector.getInsets() / (double) masterScale);
+        const auto scaledInsets = keyboardChangeDetector.getInsets().multipliedBy (1.0 / (double) masterScale);
+        d.keyboardInsets = detail::WindowingHelpers::roundToInt (scaledInsets);
         d.isMain = true;
         d.scale = masterScale * s.scale;
         d.dpi = 160 * d.scale;

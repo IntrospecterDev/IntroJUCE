@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -177,25 +170,22 @@ StringArray Font::findAllTypefaceNames()
 {
     StringArray results;
 
-   #if JUCE_USE_DIRECTWRITE
-    SharedResourcePointer<Direct2DFactories> factories;
-
-    if (factories->systemFonts != nullptr)
+    SharedResourcePointer<DirectX> directX;
+    if (auto systemFonts = directX->directWrite.getSystemFonts())
     {
         ComSmartPtr<IDWriteFontFamily> fontFamily;
         uint32 fontFamilyCount = 0;
-        fontFamilyCount = factories->systemFonts->GetFontFamilyCount();
+        fontFamilyCount = systemFonts->GetFontFamilyCount();
 
         for (uint32 i = 0; i < fontFamilyCount; ++i)
         {
-            auto hr = factories->systemFonts->GetFontFamily (i, fontFamily.resetAndGetPointerAddress());
+            auto hr = systemFonts->GetFontFamily (i, fontFamily.resetAndGetPointerAddress());
 
             if (SUCCEEDED (hr))
                 results.addIfNotAlreadyThere (getFontFamilyName (fontFamily));
         }
     }
     else
-   #endif
     {
         auto dc = CreateCompatibleDC (nullptr);
 
@@ -227,14 +217,12 @@ StringArray Font::findAllTypefaceStyles (const String& family)
 
     StringArray results;
 
-   #if JUCE_USE_DIRECTWRITE
-    SharedResourcePointer<Direct2DFactories> factories;
-
-    if (factories->systemFonts != nullptr)
+    SharedResourcePointer<DirectX> directX;
+    if (auto systemFonts = directX->directWrite.getSystemFonts())
     {
         BOOL fontFound = false;
         uint32 fontIndex = 0;
-        [[maybe_unused]] auto hr = factories->systemFonts->FindFamilyName (family.toWideCharPointer(), &fontIndex, &fontFound);
+        [[maybe_unused]] auto hr = systemFonts->FindFamilyName (family.toWideCharPointer(), &fontIndex, &fontFound);
 
         if (! fontFound)
             fontIndex = 0;
@@ -242,7 +230,7 @@ StringArray Font::findAllTypefaceStyles (const String& family)
         // Get the font family using the search results
         // Fonts like: Times New Roman, Times New Roman Bold, Times New Roman Italic are all in the same font family
         ComSmartPtr<IDWriteFontFamily> fontFamily;
-        hr = factories->systemFonts->GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress());
+        hr = systemFonts->GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress());
 
         // Get the font faces
         ComSmartPtr<IDWriteFont> dwFont;
@@ -259,7 +247,6 @@ StringArray Font::findAllTypefaceStyles (const String& family)
         }
     }
     else
-   #endif
     {
         results.add ("Regular");
         results.add ("Italic");
@@ -313,7 +300,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 }
 
 //==============================================================================
-class WindowsTypeface   : public Typeface
+class WindowsTypeface final : public Typeface
 {
 public:
     WindowsTypeface (const Font& font)  : Typeface (font.getTypefaceName(),
@@ -605,24 +592,28 @@ const MAT2 WindowsTypeface::identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0
 
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
-   #if JUCE_USE_DIRECTWRITE
-    SharedResourcePointer<Direct2DFactories> factories;
-
-    if (factories->systemFonts != nullptr)
+    SharedResourcePointer<DirectX> directX;
+    if (auto systemFonts = directX->directWrite.getSystemFonts())
     {
-        std::unique_ptr<WindowsDirectWriteTypeface> wtf (new WindowsDirectWriteTypeface (font, factories->systemFonts));
+        std::unique_ptr<WindowsDirectWriteTypeface> wtf (new WindowsDirectWriteTypeface (font, systemFonts));
 
         if (wtf->loadedOk() && wtf->isFontFound())
             return wtf.release();
     }
-   #endif
 
     return new WindowsTypeface (font);
 }
 
 Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t dataSize)
 {
-    return new WindowsTypeface (data, dataSize);
+     {
+         auto wtf = std::make_unique<WindowsDirectWriteTypeface>(data, dataSize);
+         if (wtf->loadedOk() && wtf->isFontFound())
+             return wtf.release();
+     }
+
+    auto typeface = new WindowsTypeface (data, dataSize);
+    return typeface;
 }
 
 void Typeface::scanFolderForFonts (const File&)

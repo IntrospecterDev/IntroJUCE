@@ -1,19 +1,12 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE library.
-#  Copyright (c) 2022 - Raw Material Software Limited
+#  This file is part of the JUCE 8 technical preview.
+#  Copyright (c) Raw Material Software Limited
 #
-#  JUCE is an open source library subject to commercial or open-source
-#  licensing.
+#  You may use this code under the terms of the GPL v3
+#  (see www.gnu.org/licenses).
 #
-#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-#  Agreement and JUCE Privacy Policy.
-#
-#  End User License Agreement: www.juce.com/juce-7-licence
-#  Privacy Policy: www.juce.com/juce-privacy-policy
-#
-#  Or: You may also use this code under the terms of the GPL v3 (see
-#  www.gnu.org/licenses).
+#  For the technical preview this file cannot be licensed commercially.
 #
 #  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
 #  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -87,7 +80,11 @@ target_compile_definitions(Projucer PRIVATE
     JUCE_LOG_ASSERTIONS=1
     JUCE_STRICT_REFCOUNTEDPOINTER=1
     JUCE_USE_CURL=1
-    JUCE_WEB_BROWSER=0)
+    JUCE_WEB_BROWSER=0
+    # This is a temporary workaround to allow builds to complete on Xcode 15.
+    # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
+    # deploy to older versions of macOS.
+    JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
 
 juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Icons/background_logo.svg
@@ -120,8 +117,11 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.h
     Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.cpp
     Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.h
+    Source/BinaryData/Templates/jucer_AudioPluginARAEditorTemplate.cpp
+    Source/BinaryData/Templates/jucer_AudioPluginARAEditorTemplate.h
     Source/BinaryData/Templates/jucer_AudioPluginFilterTemplate.cpp
     Source/BinaryData/Templates/jucer_AudioPluginFilterTemplate.h
+    Source/BinaryData/Templates/jucer_AudioPluginARAFilterTemplate.h
     Source/BinaryData/Templates/jucer_ComponentTemplate.cpp
     Source/BinaryData/Templates/jucer_ComponentTemplate.h
     Source/BinaryData/Templates/jucer_ContentCompSimpleTemplate.h

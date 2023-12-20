@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -26,7 +22,7 @@ namespace juce
 //==============================================================================
 namespace Android
 {
-    class Runnable  : public juce::AndroidInterfaceImplementer
+    class Runnable : public juce::AndroidInterfaceImplementer
     {
     public:
         virtual void run() = 0;
@@ -67,7 +63,7 @@ namespace Android
 }
 
 //==============================================================================
-struct AndroidMessageQueue     : private Android::Runnable
+struct AndroidMessageQueue final : private Android::Runnable
 {
     JUCE_DECLARE_SINGLETON_SINGLETHREADED (AndroidMessageQueue, true)
 
@@ -134,7 +130,7 @@ void MessageManager::runDispatchLoop()
 
 void MessageManager::stopDispatchLoop()
 {
-    struct QuitCallback  : public CallbackMessage
+    struct QuitCallback final : public CallbackMessage
     {
         QuitCallback() {}
 
@@ -169,7 +165,7 @@ void MessageManager::stopDispatchLoop()
 }
 
 //==============================================================================
-class JuceAppLifecycle   : public ActivityLifecycleCallbacks
+class JuceAppLifecycle final : public ActivityLifecycleCallbacks
 {
 public:
     JuceAppLifecycle (juce::JUCEApplicationBase* (*initSymbolAddr)())

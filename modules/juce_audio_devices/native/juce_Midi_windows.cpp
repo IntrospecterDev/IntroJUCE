@@ -1,17 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -100,8 +96,8 @@ struct MidiServiceType
 };
 
 //==============================================================================
-struct Win32MidiService  : public MidiServiceType,
-                           private Timer
+struct Win32MidiService final : public MidiServiceType,
+                                private Timer
 {
     Win32MidiService() = default;
 
@@ -131,7 +127,7 @@ private:
     struct Win32InputWrapper;
 
     //==============================================================================
-    struct MidiInCollector  : public ReferenceCountedObject
+    struct MidiInCollector final : public ReferenceCountedObject
     {
         MidiInCollector (Win32MidiService& s, MidiDeviceInfo d)
             : deviceInfo (d), midiService (s)
@@ -370,6 +366,8 @@ private:
     template <class WrapperType>
     struct Win32MidiDeviceQuery
     {
+        virtual ~Win32MidiDeviceQuery() = default;
+
         static Array<MidiDeviceInfo> getAvailableDevices()
         {
             StringArray deviceNames, deviceIDs;
@@ -419,8 +417,8 @@ private:
         }
     };
 
-    struct Win32InputWrapper  : public MidiInput::Pimpl,
-                                public Win32MidiDeviceQuery<Win32InputWrapper>
+    struct Win32InputWrapper final : public MidiInput::Pimpl,
+                                     public Win32MidiDeviceQuery<Win32InputWrapper>
     {
         Win32InputWrapper (Win32MidiService& parentService, MidiInput& midiInput, const String& deviceIdentifier, MidiInputCallback& c)
             : input (midiInput), callback (c)
@@ -517,7 +515,7 @@ private:
     };
 
     //==============================================================================
-    struct MidiOutHandle    : public ReferenceCountedObject
+    struct MidiOutHandle final : public ReferenceCountedObject
     {
         using Ptr = ReferenceCountedObjectPtr<MidiOutHandle>;
 
@@ -543,8 +541,8 @@ private:
     };
 
     //==============================================================================
-    struct Win32OutputWrapper  : public MidiOutput::Pimpl,
-                                 public Win32MidiDeviceQuery<Win32OutputWrapper>
+    struct Win32OutputWrapper final : public MidiOutput::Pimpl,
+                                      public Win32MidiDeviceQuery<Win32OutputWrapper>
     {
         Win32OutputWrapper (Win32MidiService& p, const String& deviceIdentifier)
             : parent (p)
@@ -707,7 +705,7 @@ private:
         const ScopedLock sl (activeCollectorLock);
 
         for (int i = activeCollectors.size(); --i >= 0;)
-            if (activeCollectors.getObjectPointer(i)->getReferenceCount() == 1)
+            if (activeCollectors.getObjectPointer (i)->getReferenceCount() == 1)
                 activeCollectors.remove (i);
     }
 
@@ -745,7 +743,7 @@ using namespace ABI::Windows::Devices::Enumeration;
 using namespace ABI::Windows::Storage::Streams;
 
 //==============================================================================
-struct WinRTMidiService  : public MidiServiceType
+struct WinRTMidiService final : public MidiServiceType
 {
 public:
     //==============================================================================
@@ -1008,7 +1006,7 @@ private:
 
     private:
         //==============================================================================
-        struct DeviceEnumerationThread   : public Thread
+        struct DeviceEnumerationThread final : public Thread
         {
             DeviceEnumerationThread (DeviceCallbackHandler& h,
                                      ComSmartPtr<IDeviceWatcher>& w,
@@ -1063,7 +1061,7 @@ private:
     };
 
     //==============================================================================
-    struct BLEDeviceWatcher final   : private DeviceCallbackHandler
+    struct BLEDeviceWatcher final : private DeviceCallbackHandler
     {
         struct DeviceInfo
         {
@@ -1253,7 +1251,7 @@ private:
 
     //==============================================================================
     template <typename COMFactoryType>
-    struct MidiIODeviceWatcher final   : private DeviceCallbackHandler
+    struct MidiIODeviceWatcher final : private DeviceCallbackHandler
     {
         MidiIODeviceWatcher (ComSmartPtr<COMFactoryType>& comFactory)
             : factory (comFactory)
@@ -1503,7 +1501,7 @@ private:
 
     //==============================================================================
     template <typename MIDIIOStaticsType, typename MIDIPort>
-    class WinRTIOWrapper   : private BLEDeviceWatcher::Listener
+    class WinRTIOWrapper : private BLEDeviceWatcher::Listener
     {
     public:
         WinRTIOWrapper (BLEDeviceWatcher& bleWatcher,
@@ -1586,8 +1584,8 @@ private:
     };
 
     //==============================================================================
-    struct WinRTInputWrapper final  : public MidiInput::Pimpl,
-                                      private WinRTIOWrapper<IMidiInPortStatics, IMidiInPort>
+    struct WinRTInputWrapper final : public MidiInput::Pimpl,
+                                     private WinRTIOWrapper<IMidiInPortStatics, IMidiInPort>
 
     {
         WinRTInputWrapper (WinRTMidiService& service, MidiInput& input, const String& deviceIdentifier, MidiInputCallback& cb)
@@ -1749,8 +1747,8 @@ private:
     };
 
     //==============================================================================
-    struct WinRTOutputWrapper final  : public MidiOutput::Pimpl,
-                                       private WinRTIOWrapper <IMidiOutPortStatics, IMidiOutPort>
+    struct WinRTOutputWrapper final : public MidiOutput::Pimpl,
+                                      private WinRTIOWrapper <IMidiOutPortStatics, IMidiOutPort>
     {
         WinRTOutputWrapper (WinRTMidiService& service, const String& deviceIdentifier)
             : WinRTIOWrapper <IMidiOutPortStatics, IMidiOutPort> (*service.bleDeviceWatcher, *service.outputDeviceWatcher, deviceIdentifier)
@@ -1834,7 +1832,7 @@ private:
  extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
 #endif
 
-struct MidiService :  public DeletedAtShutdown
+struct MidiService final : public DeletedAtShutdown
 {
     MidiService()
     {

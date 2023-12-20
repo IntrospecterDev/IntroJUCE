@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -50,7 +50,7 @@
 
 
 //==============================================================================
-struct MidiDeviceListEntry : ReferenceCountedObject
+struct MidiDeviceListEntry final : ReferenceCountedObject
 {
     explicit MidiDeviceListEntry (MidiDeviceInfo info) : deviceInfo (info) {}
 
@@ -72,10 +72,10 @@ struct MidiDeviceListEntry : ReferenceCountedObject
 
 
 //==============================================================================
-class MidiDemo  : public Component,
-                  private MidiKeyboardState::Listener,
-                  private MidiInputCallback,
-                  private AsyncUpdater
+class MidiDemo final : public Component,
+                       private MidiKeyboardState::Listener,
+                       private MidiInputCallback,
+                       private AsyncUpdater
 {
 public:
     //==============================================================================
@@ -233,8 +233,8 @@ public:
 
 private:
     //==============================================================================
-    struct MidiDeviceListBox : private ListBoxModel,
-                               public ListBox
+    struct MidiDeviceListBox final : private ListBoxModel,
+                                     public ListBox
     {
         MidiDeviceListBox (const String& name,
                            MidiDemo& contentComponent,
@@ -311,7 +311,7 @@ private:
         {
             SparseSet<int> selectedRows;
             for (auto i = 0; i < midiDevices.size(); ++i)
-                if (midiDevices[i]->inDevice.get() != nullptr || midiDevices[i]->outDevice.get() != nullptr)
+                if (midiDevices[i]->inDevice != nullptr || midiDevices[i]->outDevice != nullptr)
                     selectedRows.addRange (Range<int> (i, i + 1));
 
             lastSelectedItems = selectedRows;
@@ -356,7 +356,7 @@ private:
     void sendToOutputs (const MidiMessage& msg)
     {
         for (auto midiOutput : midiOutputs)
-            if (midiOutput->outDevice.get() != nullptr)
+            if (midiOutput->outDevice != nullptr)
                 midiOutput->outDevice->sendMessageNow (msg);
     }
 

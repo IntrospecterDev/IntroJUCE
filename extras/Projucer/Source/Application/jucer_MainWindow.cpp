@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -33,9 +26,9 @@
 #include "../Project/UI/jucer_ProjectContentComponent.h"
 
 //==============================================================================
-class BlurOverlayWithComponent  : public Component,
-                                  private ComponentMovementWatcher,
-                                  private AsyncUpdater
+class BlurOverlayWithComponent final : public Component,
+                                       private ComponentMovementWatcher,
+                                       private AsyncUpdater
 {
 public:
     BlurOverlayWithComponent (MainWindow& window, std::unique_ptr<Component> comp)
@@ -52,7 +45,7 @@ public:
         setVisible (true);
 
         static_cast<Component&> (mainWindow).addChildComponent (this);
-        componentMovedOrResized (true, true);
+        handleComponentMovedOrResized();
 
         enterModalState();
     }
@@ -80,7 +73,9 @@ private:
     void componentVisibilityChanged() override          {}
     using ComponentMovementWatcher::componentVisibilityChanged;
 
-    void componentMovedOrResized (bool, bool) override  { triggerAsyncUpdate(); }
+    void handleComponentMovedOrResized()                { triggerAsyncUpdate(); }
+
+    void componentMovedOrResized (bool, bool) override  { handleComponentMovedOrResized(); }
     using ComponentMovementWatcher::componentMovedOrResized;
 
     void handleAsyncUpdate() override                   { resized(); }
@@ -233,8 +228,7 @@ void MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserT
 {
     if (currentProject == nullptr)
     {
-        if (callback != nullptr)
-            callback (true);
+        NullCheckedInvocation::invoke (callback, true);
 
         return;
     }
@@ -257,8 +251,7 @@ void MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserT
 
         if (! closedSuccessfully)
         {
-            if (callback != nullptr)
-                callback (false);
+            NullCheckedInvocation::invoke (callback, false);
 
             return;
         }
@@ -267,8 +260,7 @@ void MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserT
         {
             parent->setProject (nullptr);
 
-            if (callback != nullptr)
-                callback (true);
+            NullCheckedInvocation::invoke (callback, true);
         };
 
         if (askUserToSave == OpenDocumentManager::SaveIfNeeded::no)
@@ -284,8 +276,8 @@ void MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserT
 
             if (saveResult == FileBasedDocument::savedOk)
                 setProjectAndCallback();
-            else if (callback != nullptr)
-                callback (false);
+            else
+                NullCheckedInvocation::invoke (callback, false);
         });
     });
 }
@@ -386,19 +378,15 @@ void MainWindow::openFile (const File& file, std::function<void (bool)> callback
 
                     parent->createProjectContentCompIfNeeded();
                     parent->getProjectContentComponent()->reloadLastOpenDocuments();
-
-                    parent->currentProject->updateDeprecatedProjectSettingsInteractively();
                 }
 
-                if (callback != nullptr)
-                    callback (saveResult);
+                NullCheckedInvocation::invoke (callback, saveResult);
             });
 
             return;
         }
 
-        if (callback != nullptr)
-            callback (false);
+        NullCheckedInvocation::invoke (callback, false);
 
         return;
     }
@@ -411,9 +399,7 @@ void MainWindow::openFile (const File& file, std::function<void (bool)> callback
             if (parent != nullptr)
             {
                 parent->createProjectContentCompIfNeeded();
-
-                if (callback != nullptr)
-                    callback (parent->getProjectContentComponent()->showEditorForFile (file, true));
+                NullCheckedInvocation::invoke (callback, parent->getProjectContentComponent()->showEditorForFile (file, true));
             }
         };
 
@@ -426,9 +412,7 @@ void MainWindow::openFile (const File& file, std::function<void (bool)> callback
 
                 if (openedSuccessfully)
                 {
-                    if (callback != nullptr)
-                        callback (true);
-
+                    NullCheckedInvocation::invoke (callback, true);
                     return;
                 }
 
@@ -442,8 +426,7 @@ void MainWindow::openFile (const File& file, std::function<void (bool)> callback
         return;
     }
 
-    if (callback != nullptr)
-        callback (false);
+    NullCheckedInvocation::invoke (callback, false);
 }
 
 void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callback)
@@ -452,9 +435,7 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
 
     if (! generator->hasValidPIP())
     {
-        if (callback != nullptr)
-            callback (false);
-
+        NullCheckedInvocation::invoke (callback, false);
         return;
     }
 
@@ -467,9 +448,7 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
                                                          generatorResult.getErrorMessage());
         messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
-        if (callback != nullptr)
-            callback (false);
-
+        NullCheckedInvocation::invoke (callback, false);
         return;
     }
 
@@ -480,9 +459,7 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
                                                          "Failed to create Main.cpp.");
         messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
-        if (callback != nullptr)
-            callback (false);
-
+        NullCheckedInvocation::invoke (callback, false);
         return;
     }
 
@@ -498,16 +475,13 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
                                                              "Failed to open .jucer file.");
             parent->messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
-            if (callback != nullptr)
-                callback (false);
-
+            NullCheckedInvocation::invoke (callback, false);
             return;
         }
 
         parent->setupTemporaryPIPProject (*generator);
 
-        if (callback != nullptr)
-            callback (true);
+        NullCheckedInvocation::invoke (callback, true);
     });
 }
 
@@ -577,14 +551,14 @@ bool MainWindow::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::
         Array<JucerTreeViewBase*> selected;
 
         for (int i = tv->getNumSelectedItems(); --i >= 0;)
-            if (auto* b = dynamic_cast<JucerTreeViewBase*> (tv->getSelectedItem(i)))
+            if (auto* b = dynamic_cast<JucerTreeViewBase*> (tv->getSelectedItem (i)))
                 selected.add (b);
 
         if (! selected.isEmpty())
         {
             for (int i = selected.size(); --i >= 0;)
             {
-                if (auto* jtvb = selected.getUnchecked(i))
+                if (auto* jtvb = selected.getUnchecked (i))
                 {
                     auto f = jtvb->getDraggableFile();
 
@@ -744,9 +718,7 @@ static void askAllWindowsToCloseRecursive (WeakReference<MainWindowList> parent,
 {
     if (parent->windows.size() == 0)
     {
-        if (callback != nullptr)
-            callback (true);
-
+        NullCheckedInvocation::invoke (callback, true);
         return;
     }
 
@@ -757,9 +729,7 @@ static void askAllWindowsToCloseRecursive (WeakReference<MainWindowList> parent,
 
         if (! closedSuccessfully)
         {
-            if (callback != nullptr)
-                callback (false);
-
+            NullCheckedInvocation::invoke (callback, false);
             return;
         }
 
@@ -822,7 +792,7 @@ void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grab
 
     for (int i = desktop.getNumComponents(); --i >= 0;)
     {
-        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
+        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent (i)))
         {
             if (auto* pcc = mw->getProjectContentComponent())
             {
@@ -843,9 +813,7 @@ void MainWindowList::openFile (const File& file, std::function<void (bool)> call
 {
     if (! file.exists())
     {
-        if (callback != nullptr)
-            callback (false);
-
+        NullCheckedInvocation::invoke (callback, false);
         return;
     }
 
@@ -855,9 +823,7 @@ void MainWindowList::openFile (const File& file, std::function<void (bool)> call
         {
             w->toFront (true);
 
-            if (callback != nullptr)
-                callback (true);
-
+            NullCheckedInvocation::invoke (callback, true);
             return;
         }
     }
@@ -891,8 +857,7 @@ void MainWindowList::openFile (const File& file, std::function<void (bool)> call
                 parent->closeWindow (w);
             }
 
-            if (callback != nullptr)
-                callback (openedSuccessfully);
+            NullCheckedInvocation::invoke (callback, openedSuccessfully);
         });
 
         return;
@@ -900,8 +865,8 @@ void MainWindowList::openFile (const File& file, std::function<void (bool)> call
 
     getFrontmostWindow()->openFile (file, [parent, callback] (bool openedSuccessfully)
     {
-        if (parent != nullptr && callback != nullptr)
-            callback (openedSuccessfully);
+        if (parent != nullptr)
+            NullCheckedInvocation::invoke (callback, openedSuccessfully);
     });
 }
 
@@ -1038,7 +1003,7 @@ void MainWindowList::saveCurrentlyOpenProjectList()
 
     for (int i = 0; i < desktop.getNumComponents(); ++i)
     {
-        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
+        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent (i)))
             if (auto* p = mw->getProject())
                 if (! p->isTemporaryProject())
                     projects.add (p->getFile());
@@ -1067,7 +1032,7 @@ Project* MainWindowList::getFrontmostProject()
     auto& desktop = Desktop::getInstance();
 
     for (int i = desktop.getNumComponents(); --i >= 0;)
-        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
+        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent (i)))
             if (auto* p = mw->getProject())
                 return p;
 

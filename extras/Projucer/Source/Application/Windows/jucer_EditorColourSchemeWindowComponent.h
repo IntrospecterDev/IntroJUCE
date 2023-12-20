@@ -1,20 +1,13 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE 8 technical preview.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+   You may use this code under the terms of the GPL v3
+   (see www.gnu.org/licenses).
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
-
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
-
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   For the technical preview this file cannot be licensed commercially.
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -28,7 +21,7 @@
 #include "../../Utility/UI/PropertyComponents/jucer_ColourPropertyComponent.h"
 
 //==============================================================================
-class EditorColourSchemeWindowComponent    : public Component
+class EditorColourSchemeWindowComponent final : public Component
 {
 public:
     EditorColourSchemeWindowComponent()
@@ -62,8 +55,8 @@ private:
     //==============================================================================
     struct AppearanceEditor
     {
-        struct FontScanPanel   : public Component,
-                                 private Timer
+        struct FontScanPanel final : public Component,
+                                     private Timer
         {
             FontScanPanel()
             {
@@ -121,7 +114,7 @@ private:
         };
 
         //==============================================================================
-        struct EditorPanel  : public Component
+        struct EditorPanel final : public Component
         {
             EditorPanel()
                 : loadButton ("Load Scheme..."),
@@ -282,7 +275,7 @@ private:
         };
 
         //==============================================================================
-        struct FontNameValueSource   : public ValueSourceFilter
+        struct FontNameValueSource final : public ValueSourceFilter
         {
             FontNameValueSource (const Value& source)  : ValueSourceFilter (source) {}
 
@@ -321,7 +314,7 @@ private:
         };
 
         //==============================================================================
-        struct FontSizeValueSource   : public ValueSourceFilter
+        struct FontSizeValueSource final : public ValueSourceFilter
         {
             FontSizeValueSource (const Value& source)  : ValueSourceFilter (source) {}
 

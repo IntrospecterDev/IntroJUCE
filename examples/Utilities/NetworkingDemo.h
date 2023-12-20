@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -49,8 +49,8 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class NetworkingDemo   : public Component,
-                         private Thread
+class NetworkingDemo final : public Component,
+                             private Thread
 {
 public:
     NetworkingDemo()
@@ -104,7 +104,7 @@ public:
         int statusCode = 0;
 
         if (auto stream = url.createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)
-                                                                                 .withConnectionTimeoutMs(10000)
+                                                                                 .withConnectionTimeoutMs (10000)
                                                                                  .withResponseHeaders (&responseHeaders)
                                                                                  .withStatusCode (&statusCode)))
         {
