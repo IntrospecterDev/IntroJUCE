@@ -1191,20 +1191,12 @@ struct MenuWindow final : public Component
         if (childComp == nullptr || ! hasActiveSubMenu (childComp->item))
             return false;
 
-<<<<<<< HEAD
-            activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
-            activeSubMenu->setOpaque(false);
-            activeSubMenu->enterModalState (false);
-            activeSubMenu->toFront (false);
-            return true;
-        }
-=======
+
         activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
                                                             options.forSubmenu()
                                                                    .withTargetScreenArea (childComp->getScreenBounds())
                                                                    .withMinimumWidth (0),
                                                             false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
->>>>>>> direct2d
 
         activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
         activeSubMenu->enterModalState (false);
