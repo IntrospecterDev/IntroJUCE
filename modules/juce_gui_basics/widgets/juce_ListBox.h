@@ -614,6 +614,8 @@ private:
     JUCE_PUBLIC_IN_DLL_BUILD (class RowComponent)
     friend class ListViewport;
     friend class TableListBox;
+    friend class ourJuceTableListBox;
+
     ListBoxModel* model = nullptr;
     std::unique_ptr<ListViewport> viewport;
     std::unique_ptr<Component> headerComponent;

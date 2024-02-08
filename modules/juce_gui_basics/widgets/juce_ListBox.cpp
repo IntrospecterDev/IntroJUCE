@@ -804,7 +804,9 @@ void ListBox::selectRowsBasedOnModifierKeys (const int row,
     }
     else if ((! mods.isPopupMenu()) || ! isRowSelected (row))
     {
-        selectRowInternal (row, false, ! (multipleSelection && (! isMouseUpEvent) && isRowSelected (row)), true);
+        if (!mods.isRightButtonDown()){  // Giulio - added in order to avoid selection on right click
+            selectRowInternal (row, false, ! (multipleSelection && (! isMouseUpEvent) && isRowSelected (row)), true);
+        }
     }
 }
 

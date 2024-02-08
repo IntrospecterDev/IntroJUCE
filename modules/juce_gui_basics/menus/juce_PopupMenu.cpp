@@ -74,8 +74,8 @@ struct HeaderItemComponent final : public PopupMenu::CustomComponent
                                                                idealWidth,
                                                                idealHeight,
                                                                options);
-        idealHeight += idealHeight / 2;
-        idealWidth += idealWidth / 4;
+        idealHeight += idealHeight / 4;
+//        idealWidth += idealWidth / 4;
     }
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
@@ -1197,6 +1197,7 @@ struct MenuWindow final : public Component
                                                                    .withMinimumWidth (0),
                                                             false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
 
+
         activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
         activeSubMenu->enterModalState (false);
         activeSubMenu->toFront (false);
@@ -1597,6 +1598,7 @@ PopupMenu::PopupMenu (const PopupMenu& other)
     : items (other.items),
       lookAndFeel (other.lookAndFeel)
 {
+    
 }
 
 PopupMenu& PopupMenu::operator= (const PopupMenu& other)
@@ -2122,8 +2124,8 @@ int PopupMenu::showWithOptionalCallback (const Options& options,
         callback->component.reset (window);
 
         PopupMenuSettings::menuWasHiddenBecauseOfAppChange = false;
-
         window->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
+        window->setOpaque(false);
         window->enterModalState (false, userCallbackDeleter.release());
         ModalComponentManager::getInstance()->attachCallback (window, callback.release());
 
